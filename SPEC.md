@@ -45,15 +45,26 @@ features, mechanics, and what is deliberately NOT being built.
     lua/lore/       # the logic (vaults, pane, todo, links, templates)
   bin/lore          # socket-probe launcher
 ~/.lore/
-  config.lua        # user config: vault registry, keybindings, options
-  preferences.json  # persisted state (active vault)
+  config.lua        # optional; bring-your-own-plugins ONLY (vimoire-style);
+                    #   never machine-written, never settings
+  preferences.json  # machine-owned state: vault registry, active vault,
+                    #   options — written only by lore commands
 ```
 
-**Multi-vault:** `config.lua` returns a table with a *named vault registry*
-(`vaults = { personal = "...", work = "..." }`). Exactly one **active vault**
-at a time — every picker, grep, backlink, and pane is scoped to it, never
-across. A switcher command changes vaults; last choice persists. No hardcoded
-paths anywhere in app code.
+**Config is authored via vim commands, never hand-edited.** `preferences.json`
+is the single settings store; every knob gets there through a `:Lore*` command.
+`config.lua` exists solely for plugin injection (the one job JSON and commands
+can't do — vimoire precedent, where John has never once opened the file for
+settings). Keymap/option *defaults* are app code — the repo is the app, so
+"customizing defaults" means editing the repo and committing.
+
+**Multi-vault:** the vault registry lives in `preferences.json`, managed by
+`:LoreVaultAdd` / `:LoreVaultList` / `:LoreVaultSwitch`. Exactly one **active
+vault** at a time — every picker, grep, backlink, and pane is scoped to it,
+never across; cwd follows the active vault. Switching persists; lore reopens
+the last active vault. `:LoreVaultAdd` scaffolds the minimum — `inbox.md`,
+`todo.md`, `archive.md` — folders stay born-on-use. No hardcoded paths
+anywhere in app code.
 
 **Launcher / lifecycle:** launch on first use (not a login item). Persistent
 neovide instance living as a parallel OS window (open alongside coding /
@@ -61,7 +72,9 @@ meetings). `bin/lore`: probe `/tmp/lore.sock` with `--remote-expr 1` (a stale
 socket after a crash *hangs*; probe before use); alive → `nvim --server ...
 --remote <file>` + `:NeovideFocus`; dead → cold-launch neovide with
 `--listen`. Config calls `vim.fn.serverstart("/tmp/lore.sock")`. Global
-hotkey (Raycast) → launcher.
+hotkey (Raycast) → launcher. On open, lore shows the active vault's
+`todo.md`; with an empty registry (true first launch) it shows a message
+directing to `:LoreVaultAdd`. No dashboard in v1 (maybe v2).
 
 ## Vault structure & format
 
@@ -120,6 +133,9 @@ file directly (no human present).
   the meeting template). *Promoted from deferred: it's capture
   infrastructure, same family as inbox quick-add.*
 
+Raycast scripts live in John's separate raycast repo, not here. They write
+files; they never commit (see git auto-commit section).
+
 **Vault-level (inside lore)**
 - Find file (picker), live grep, tag search (rg over frontmatter/#tags)
 - Switch vault (picker; everything rescopes; persists)
@@ -155,8 +171,12 @@ file directly (no human present).
 **Neo-tree:** stock verbs; creation location implicit from tree position.
 Nothing custom v1.
 
-**Keybindings: deliberately unspecified.** John wants a semantic-keybinding
-refactor as its own effort; assign keys then. This spec defines verbs only.
+**Keybindings: verbs first, keys are config data.** Every feature is a user
+command; keymaps only dispatch to commands, never inline closures. Each
+command accepts one key or a list of keys (vimoire-style normalizer, `nil`
+disables). Defaults adopt okf's settled scheme (its resolved decision 12:
+`f` find family, `n` new family, singles for inbox/frontmatter) until John's
+semantic-keybinding refactor, which will reassign keys as its own effort.
 
 ## Links + backlinks pane
 
@@ -184,11 +204,17 @@ admired screenshot). The largest UI piece — watch it hardest.*
 
 ## Treesitter / markdown mechanics
 
-- Parsers: `markdown`, `markdown_inline`, `yaml` (frontmatter is
-  yaml-injected — highlights for free).
-- nvim-treesitter **main branch** (the old `nvim-treesitter.configs` /
-  `ensure_installed` API is dead). Highlighting via `FileType` autocmd →
-  `vim.treesitter.start()`. Reference implementation: dotfiles
+- Core 0.12 owns the treesitter runtime (highlighting, folds,
+  `vim.treesitter.*`); markdown + markdown_inline parsers ship with nvim.
+  nvim-treesitter (main branch) is retained **only as the parser installer**
+  — NVIM_APPNAME isolates lore's data dir, so parsers from John's main nvim
+  are invisible; lore installs its own.
+- Parsers to install: `yaml` (frontmatter injection — highlights for free)
+  plus code-fence injection languages (`ruby`, `bash`, `lua`, `sql`, `json`
+  as the starting set; adjust freely).
+- nvim-treesitter-textobjects for code-block textobjects (fences are
+  `fenced_code_block` nodes). treesitter-context rejected — no verb needs it.
+- Reference implementation for main-branch API: dotfiles
   `lua/plugins/treesitter.lua`.
 - Folding: `vim.treesitter.foldexpr()`, `foldlevel=99`, `foldtext=""`.
 - `conceallevel=2` — stock markdown_inline conceal metadata hides link URLs
@@ -242,8 +268,11 @@ admired screenshot). The largest UI piece — watch it hardest.*
   quit is rare.
 - The age feature only needs ~daily granularity; the debounce is headroom,
   not obligation. Start coarse.
-- **Raycast scripts commit their own writes** (inbox appends and meeting
-  notes happen outside vim's autocmds — every writer cleans up after itself).
+- Raycast scripts do **not** commit (earlier spec draft misrecorded this).
+  External writes ride the next lore auto-commit; day-level blame
+  granularity doesn't care. lore sets `autoread` + `checktime` on
+  FocusGained so external appends flow into open buffers instead of
+  triggering file-changed prompts.
 - Commit messages: auto-timestamp. Nobody reads a private vault's log; blame
   only needs dates.
 - **Push is deferred.** Local-first; commit-always is what blame needs.
@@ -258,8 +287,12 @@ admired screenshot). The largest UI piece — watch it hardest.*
 
 ## Plugins (hard budget)
 
-lazy.nvim · nvim-treesitter (main) · one picker (snacks.picker vs fzf-lua —
-open) · **neo-tree** (accepted: existing daily habit, and it carries the
+Plugin manager: **vim.pack** (built into 0.12) — a persistent instance has
+nothing to lazy-load, so lazy.nvim would be a dependency doing no job.
+
+nvim-treesitter (main, parser install only) · nvim-treesitter-textobjects ·
+**snacks** (picker — resolved over fzf-lua; also input/win if the pane wants
+them) · **neo-tree** (accepted: existing daily habit, and it carries the
 creation-location story) · vim-surround (tiny, replaces inline-style
 feature). Nothing else at v1. Every addition needs a named friction.
 
@@ -300,12 +333,16 @@ feature). Nothing else at v1. Every addition needs a named friction.
 
 ## Open decisions
 
-1. Vault path(s) — user config anyway; pick at setup.
-2. Picker: snacks.picker vs fzf-lua.
+1. ~~Vault path(s)~~ — resolved: registry in `preferences.json` via
+   `:LoreVaultAdd`; nothing baked in.
+2. ~~Picker~~ — resolved: snacks.picker ("fine for now, we can try it").
 3. Normal-mode indent key (C-Tab neovide-only, or skip normal-mode entirely).
 4. Todo age display mechanism (virtual text / sort factor / on-demand).
-5. Auto-commit debounce default.
-6. Keybindings — all of them, pending the semantic-keybinding refactor.
+5. ~~Auto-commit debounce default~~ — resolved: 15 min (config number).
+6. Keybindings — okf's scheme as defaults; full reassignment pending the
+   semantic-keybinding refactor.
+7. Does `:LoreVaultAdd` `git init` a non-repo path? (Auto-commit and todo
+   age silently depend on every vault being a repo.)
 
 ## Prior art (all local)
 
