@@ -11,7 +11,9 @@ local COMMANDS = {
   { cmd = "LorePane", display = "Find > Links Pane" },
 
   -- New
-  { cmd = "LoreNewPage", display = "New > Page" },
+  { cmd = "LoreNewPage", display = "New > Page (notes)" },
+  { cmd = "LoreNewPage ideas/", display = "New > Idea" },
+  { cmd = "LoreNewPage projects/", display = "New > Project" },
   { cmd = "LorePageFromSelection", display = "New > Page From Selection" },
   { cmd = "LorePageFromWord", display = "New > Page From Word" },
 

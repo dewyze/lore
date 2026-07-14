@@ -98,23 +98,32 @@ vim.api.nvim_create_user_command("LoreTags", function()
   require("lore.pickers").tags()
 end, { desc = "Search tags in the active vault" })
 
+-- :LoreNewPage [{folder}/] [{title...}] — a first arg ending in "/" names
+-- the destination (created if missing); default is notes/. No title
+-- prompts for one. Folder-targeted keybindings pass the folder arg.
 vim.api.nvim_create_user_command("LoreNewPage", function(opts)
+  local args = vim.list_slice(opts.fargs)
+  local dir = "notes"
+  if args[1] and args[1]:match("/$") then
+    dir = table.remove(args, 1):gsub("/$", "")
+  end
   local function create_and_open(title)
-    local ok, result = pcall(require("lore.pages").create, title)
+    local ok, result = pcall(require("lore.pages").create, title, dir)
     if not ok then
       return notify_error(result)
     end
     vim.cmd.edit(vim.fn.fnameescape(result))
   end
-  if opts.args ~= "" then
-    return create_and_open(opts.args)
+  local title = table.concat(args, " ")
+  if title ~= "" then
+    return create_and_open(title)
   end
-  vim.ui.input({ prompt = "page title" }, function(title)
-    if title then
-      create_and_open(title)
+  vim.ui.input({ prompt = ("page title (%s/)"):format(dir) }, function(input)
+    if input then
+      create_and_open(input)
     end
   end)
-end, { nargs = "*", desc = "Create a page in unsorted/ and open it" })
+end, { nargs = "*", desc = "Create a page and open it (LoreNewPage {folder}/ {title})" })
 
 vim.api.nvim_create_user_command("LorePageFromSelection", function()
   require("lore.pages").from_selection()

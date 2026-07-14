@@ -1,6 +1,7 @@
--- Page creation. New pages are born in unsorted/ — a standing signal that
--- they need homes; organization is deferred, not required. Filenames are
--- the fzf retrieval surface: lowercase snake_case, no spaces.
+-- Page creation. Pages are born in their homes — notes/ by default, or a
+-- named folder (folder-targeted keybindings make the choice one
+-- keystroke). No triage state; folders self-create. Filenames are the
+-- fzf retrieval surface: lowercase snake_case, no spaces.
 local vaults = require("lore.vaults")
 
 local M = {}
@@ -28,16 +29,16 @@ local function active_vault()
   return vault
 end
 
--- Create (if needed) unsorted/<slug>.md and return its absolute path.
-function M.create(title)
+-- Create (if needed) <dir>/<slug>.md and return its absolute path.
+function M.create(title, dir)
   local slug = M.slugify(title)
   if slug == "" then
     error("empty page title")
   end
   local vault = active_vault()
-  local dir = vault.path .. "/unsorted"
-  vim.fn.mkdir(dir, "p")
-  local path = dir .. "/" .. slug .. ".md"
+  local target = vault.path .. "/" .. (dir or "notes")
+  vim.fn.mkdir(target, "p")
+  local path = target .. "/" .. slug .. ".md"
   if vim.fn.filereadable(path) == 0 then
     vim.fn.writefile({}, path)
   end

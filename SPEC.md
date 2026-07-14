@@ -87,8 +87,10 @@ vault/
   inbox.md          # quick-capture target, append-only (unsorted *lines*)
   todo.md           # work todos (see todo.md spec below)
   archive.md        # done todos, swept from todo.md by explicit command
-  unsorted/         # default birth place for new pages (unsorted *files*)
-  ideas/            # single folder; destination (build vs write) is metadata
+  notes/            # default birth place for new pages; everything that
+                    #   isn't an idea/project/meeting — a home, not a queue
+  ideas/            # musings, blog seeds, brainstorming; destination
+                    #   (build vs write) is metadata
   projects/         # the spine; one file per project
   meetings/
   templates/        # per-vault templates, plain visible folder
@@ -97,9 +99,11 @@ vault/
 - Folders earn existence by *type-at-creation*, not topic. Retrieval is flat
   (rg/fzf). Folders born on use — no contacts/ until a person page is born
   (first 1:1 note), at which point whatever dir is typed gets created.
-- `unsorted/` is a standing signal — to a future LLM pass *or* a human sweep —
-  that these files need homes. Works today with manual sweeps; doesn't
-  require the enrichment pass to exist.
+- **No triage state** (settled 14 Jul 2026, replacing `unsorted/`): pages
+  are born in their homes. Retrieval is flat, so shelving has near-zero
+  cost of error — a queue of "files needing homes" is a guilt pile with
+  no payoff. Folder-targeted creation makes the birth choice one
+  keystroke; when unsure, `notes/` *is* the answer, permanently if need be.
 - Plain markdown, OKF-flavored: YAML frontmatter + standard markdown links
   (`[Title](/path.md)`), freeform body. No custom filetype.
 - **Frontmatter minimum:** nothing required. Meetings get `date:`,
@@ -116,7 +120,9 @@ vault/
 Creation and templating are **orthogonal primitives**:
 
 - **Make a file** — via neo-tree (location = tree position), via
-  make-page-from-string or new-page command (location = `unsorted/`), via
+  make-page-from-word/selection or new-page command (location = `notes/`
+  by default; `:LoreNewPage {folder}/ {title}` targets a folder, created
+  if missing, with keybindings per folder — `\nn`/`\ni`/`\np` style), via
   Raycast meeting script (location = `meetings/`, machine-decided).
 - **Apply a template** — picker over `templates/`, *inserts into the current
   buffer* with `{{date}}`/`{{title}}` substituted. Works on any empty file
@@ -143,14 +149,14 @@ files; they never commit (see git auto-commit section).
 **Vault-level (inside lore)**
 - Find file (picker), live grep, tag search (rg over frontmatter/#tags)
 - Switch vault (picker; everything rescopes; persists)
-- New page → `unsorted/`
+- New page → `notes/` by default; folder-targeted variants
 - Append to inbox from inside (stray thought without leaving buffer)
 - Toggle neo-tree
 
 **Buffer, normal/visual**
 - Follow link (`gf`/`gx`); root-relative `/path.md` links need a small
   `includeexpr`; `gf` on a missing file → create it
-- Make page from word/selection → create in `unsorted/`, replace text with link
+- Make page from word/selection → create in `notes/`, replace text with link
 - Links + backlinks pane (see below)
 - Jump to frontmatter (and back)
 - Apply template into buffer
@@ -322,8 +328,10 @@ feature). Nothing else at v1. Every addition needs a named friction.
    retro-tag old notes as new vocabulary emerges. Gate: only if real use
    shows John reaching for tag/link surfaces and finding them thin —
    proven valuable for idea/leadership work in Obsidian, not project work;
-   this vault is both. If built: incremental (git-diff-gated), machine
-   edits identifiable and regenerable, single script, never load-bearing,
+   this vault is both. If built: incremental (git-diff-gated via a
+   last-run SHA bookmark in preferences.json — auto-commits don't break
+   this, the pass diffs bookmark..HEAD, not "uncommitted"), machine edits
+   identifiable and regenerable, single script, never load-bearing,
    never per-query. Propose-then-review vs commit-and-trust: decide at
    build time (reviewing tag diffs is itself the taxonomist work being
    avoided).

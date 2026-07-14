@@ -41,7 +41,7 @@ describe("lore.templates", function()
         { "---", "date: {{date}}", "---", "# {{title}}" },
         vault_dir .. "/templates/note.md"
       )
-      vim.cmd.edit(vault_dir .. "/unsorted/rails_upgrade.md")
+      vim.cmd.edit(vault_dir .. "/notes/rails_upgrade.md")
       templates.apply(vault_dir .. "/templates/note.md")
       assert.same({
         "---",
@@ -54,7 +54,7 @@ describe("lore.templates", function()
 
     it("inserts at the cursor in a non-empty buffer", function()
       vim.fn.writefile({ "## Notes", "" }, vault_dir .. "/templates/section.md")
-      vim.cmd.edit(vault_dir .. "/unsorted/existing.md")
+      vim.cmd.edit(vault_dir .. "/notes/existing.md")
       vim.api.nvim_buf_set_lines(0, 0, -1, false, { "first", "last" })
       vim.api.nvim_win_set_cursor(0, { 1, 0 })
       templates.apply(vault_dir .. "/templates/section.md")
