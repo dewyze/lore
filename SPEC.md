@@ -373,6 +373,11 @@ feature). Nothing else at v1. Every addition needs a named friction.
    revisit near the end; both snacks and fzf-lua are fully themeable.
 9. ~~`wall`-before-commit (autosave)?~~ — resolved: yes; autosave +
    debounced commit both ride idle pauses (see git auto-commit section).
+10. Raycast meeting-note script (`~/dev/raycast/scripts/lore-meeting-note.sh`)
+    is untested against live icalBuddy output — parser written from
+    documented format. Test on a day with real meetings; if parsing is
+    off, capture `icalBuddy -nc -b "" -li 1 -ea -iep "title,attendees"
+    eventsNow` output and fix in one pass.
 
 ## Prior art (all local)
 
