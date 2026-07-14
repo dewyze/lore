@@ -63,8 +63,8 @@ function M.reset()
 end
 
 -- One pause boundary: write everything, then maybe commit. noautocmd so
--- autosave has no side effects (BufWritePre renumbering could move text
--- under a mid-edit cursor); renumber runs on explicit :w and the command.
+-- autosave is pure persistence — no write-hook side effects. (Renumbering
+-- rides BufLeave, not writes.)
 function M.checkpoint(opts)
   vim.cmd("silent! noautocmd wall")
   M.commit_all(opts)

@@ -103,7 +103,9 @@ local renumber_query = vim.treesitter.query.parse("markdown", "(list) @list")
 
 -- Renumber every ordered list (nested included — each treesitter list
 -- node is its own sequence), anchored on its first item's number.
--- Returns whether anything changed. Runs on BufWritePre + :LoreRenumber.
+-- Returns whether anything changed. Runs on BufLeave/QuitPre (attention
+-- boundaries, like todo sort) + :LoreRenumber. Number tokens are
+-- structure, not speech — this augments, it never rewords.
 function M.renumber(bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   local parser = vim.treesitter.get_parser(bufnr, "markdown")
@@ -144,14 +146,19 @@ function M.shift_tab()
   return "<S-Tab>"
 end
 
--- Renumber at the write boundary — deterministic, and never moves text
--- under the cursor mid-typing.
+-- Renumber when attention leaves the buffer — tidy on return, never
+-- moves text under an active cursor. QuitPre companion because BufLeave
+-- doesn't fire on all quit paths.
 function M.setup()
-  vim.api.nvim_create_autocmd("BufWritePre", {
+  vim.api.nvim_create_autocmd({ "BufLeave", "QuitPre" }, {
     group = vim.api.nvim_create_augroup("lore_lists", {}),
     pattern = "*.md",
     callback = function(event)
-      M.renumber(event.buf)
+      if M.renumber(event.buf) then
+        vim.api.nvim_buf_call(event.buf, function()
+          vim.cmd("silent! update")
+        end)
+      end
     end,
   })
 end

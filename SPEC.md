@@ -29,9 +29,13 @@ features, mechanics, and what is deliberately NOT being built.
 - **No portability layer without a second consumer.** No JSON store. Markdown
   is the store — human-edited, LLM-readable, script-parseable.
 - **Capture is frictionless; organization is deferred, not required.**
-- **Nothing acts unasked** — automation triggers are user actions or
-  attention boundaries (BufLeave, FocusLost), never silent background magic
-  that changes content meaning.
+- **Automation never rewrites what John said.** (Settled 14 Jul 2026,
+  replacing a misremembered "nothing acts unasked".) Machines may append,
+  manage and augment metadata (frontmatter, tags), and restructure without
+  rewording — todo.md sort reorders whole lines, renumbering rewrites list
+  markers; structure is not speech. Anything beyond that, a human asked
+  for. Automation triggers live at attention boundaries (idle pauses,
+  BufLeave), never mid-typing.
 
 ## Architecture
 
@@ -270,10 +274,10 @@ admired screenshot). The largest UI piece — watch it hardest.*
   a bare Logseq-style timer, pauses never land mid-word. Prior art:
   obsidian-git's "N minutes after last change" mode is this shape.
 - Every pause runs **autosave** (`silent! noautocmd wall` — obsidian-style;
-  no-op when clean). noautocmd deliberately: BufWritePre renumbering must
-  not ride autosaves (it could move text under a mid-edit cursor), so
-  renumber stays on explicit `:w`/`:LoreRenumber`. If that proves too
-  rare, hook renumber into the debounced commit moment instead.
+  no-op when clean). noautocmd deliberately: autosave is pure persistence,
+  no write-hook side effects. Renumbering rides BufLeave/QuitPre instead
+  (like todo sort — tidy on return, never moves under the cursor), plus
+  explicit `:LoreRenumber`.
 - Commits ride the same pauses, **debounced** (at most once per ~15 min;
   `autocommit_minutes` preference) + `VimLeavePre` force backstop. On-quit
   alone is wrong — lore is a persistent instance, quit is rare.
@@ -309,10 +313,20 @@ feature). Nothing else at v1. Every addition needs a named friction.
 
 ## Deferred — do NOT build until friction proves the need
 
-1. **LLM enrichment pass** — related-but-unlinked notes, suggested
-   links/frontmatter, sweeping `unsorted/`. If built: incremental
-   (git-diff-gated), LLM proposes / program persists, single script, never
-   load-bearing, never per-query.
+1. **LLM enrichment pass** — "engineering discoverability" (shaped
+   14 Jul 2026). Hand-tagging is a gesture, never an obligation; the pass
+   does the thinking John doesn't want to: reconcile tag vocabulary drift
+   (suggest from the *observed* vocabulary — democracy/democrat/political
+   was the Obsidian failure — never invent ontology), suggest
+   related-but-unlinked notes (backlinks only see explicit links), maybe
+   retro-tag old notes as new vocabulary emerges. Gate: only if real use
+   shows John reaching for tag/link surfaces and finding them thin —
+   proven valuable for idea/leadership work in Obsidian, not project work;
+   this vault is both. If built: incremental (git-diff-gated), machine
+   edits identifiable and regenerable, single script, never load-bearing,
+   never per-query. Propose-then-review vs commit-and-trust: decide at
+   build time (reviewing tag diffs is itself the taxonomist work being
+   avoided).
 2. **Aggregate views** — orphans, broken links, graph (may be
    Obsidian-admiration; requires whole-vault pass).
 3. **sai-style deterministic verbs** (`next`, `set-status`) — only if an
@@ -330,8 +344,9 @@ feature). Nothing else at v1. Every addition needs a named friction.
   and optional (rg is the floor).
 - No plugin ecosystem or config surface for hypothetical users. An app for
   one person.
-- No silent automation that changes content (sorting on BufLeave is
-  position-only and user-visible; archiving is explicit).
+- No automation that rewrites prose. Restructuring is bounded: sort is
+  position-only, archive relocation is explicit, renumbering touches list
+  markers only.
 
 ## Watch-list (John's over-tooling tells — check work against these)
 
