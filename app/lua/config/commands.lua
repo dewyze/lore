@@ -22,6 +22,10 @@ vim.api.nvim_create_user_command("LoreVaultAdd", function(opts)
   end
 end, { nargs = "+", complete = "dir", desc = "Register a vault (scaffold + git init)" })
 
+vim.api.nvim_create_user_command("LoreRenumber", function()
+  require("lore.lists").renumber()
+end, { desc = "Renumber ordered lists" })
+
 vim.api.nvim_create_user_command("LoreTodoSort", function()
   require("lore.todo").sort()
 end, { desc = "Sort todo lists by state, subtree-aware" })

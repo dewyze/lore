@@ -345,6 +345,10 @@ feature). Nothing else at v1. Every addition needs a named friction.
    semantic-keybinding refactor.
 7. ~~Does `:LoreVaultAdd` `git init` a non-repo path?~~ — resolved: yes
    (auto-commit and todo age depend on every vault being a repo).
+8. Picker appearance/theming (snacks highlight groups, layout presets) —
+   revisit near the end; both snacks and fzf-lua are fully themeable.
+9. `wall`-before-commit on FocusLost (autosave) — commits currently
+   capture disk state only; unsaved buffer edits ride a later commit.
 
 ## Prior art (all local)
 

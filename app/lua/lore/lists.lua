@@ -99,6 +99,36 @@ function M.open_above()
   open_at(0)
 end
 
+local renumber_query = vim.treesitter.query.parse("markdown", "(list) @list")
+
+-- Renumber every ordered list (nested included — each treesitter list
+-- node is its own sequence), anchored on its first item's number.
+-- Returns whether anything changed. Runs on BufWritePre + :LoreRenumber.
+function M.renumber(bufnr)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  local parser = vim.treesitter.get_parser(bufnr, "markdown")
+  local root = parser:parse()[1]:root()
+  local changed = false
+  for _, node in renumber_query:iter_captures(root, bufnr) do
+    local counter = nil
+    for child in node:iter_children() do
+      if child:type() == "list_item" then
+        local row = child:range()
+        local line = vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false)[1]
+        local indent, number, rest = line:match("^(%s*)(%d+)([.)].*)$")
+        if number then
+          counter = counter and counter + 1 or tonumber(number)
+          if tonumber(number) ~= counter then
+            vim.api.nvim_buf_set_lines(bufnr, row, row + 1, false, { indent .. counter .. rest })
+            changed = true
+          end
+        end
+      end
+    end
+  end
+  return changed
+end
+
 -- Insert-mode <Tab>/<S-Tab>: indent/dedent on a list item, literal elsewhere.
 function M.tab()
   if parse(vim.api.nvim_get_current_line()) then
@@ -112,6 +142,18 @@ function M.shift_tab()
     return "<C-d>"
   end
   return "<S-Tab>"
+end
+
+-- Renumber at the write boundary — deterministic, and never moves text
+-- under the cursor mid-typing.
+function M.setup()
+  vim.api.nvim_create_autocmd("BufWritePre", {
+    group = vim.api.nvim_create_augroup("lore_lists", {}),
+    pattern = "*.md",
+    callback = function(event)
+      M.renumber(event.buf)
+    end,
+  })
 end
 
 return M

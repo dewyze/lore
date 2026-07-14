@@ -6,6 +6,9 @@ vim.bo.softtabstop = 2
 -- stock markdown_inline conceal hides link URLs; cursor line reveals raw
 vim.opt_local.conceallevel = 2
 
+-- fuzzy-filter the [[ page completion (native ins-completion)
+vim.opt_local.completeopt:append("fuzzy")
+
 vim.opt_local.foldmethod = "expr"
 vim.opt_local.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 vim.opt_local.foldlevel = 99
@@ -19,6 +22,8 @@ local navigate = require("lore.navigate")
 vim.keymap.set("n", "gf", links.follow, { buffer = true, desc = "follow link (create if missing)" })
 vim.keymap.set({ "n", "x" }, "]]", navigate.next_heading, { buffer = true, desc = "next heading" })
 vim.keymap.set({ "n", "x" }, "[[", navigate.prev_heading, { buffer = true, desc = "previous heading" })
+
+vim.keymap.set("n", "<Space>", "<Cmd>LoreCheckboxCycle<CR>", { buffer = true, desc = "cycle checkbox" })
 
 vim.keymap.set("n", "p", function()
   require("lore.urls").paste()
