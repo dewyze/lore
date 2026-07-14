@@ -11,7 +11,8 @@ vim.o.shadafile = "NONE"
 vim.opt.runtimepath:prepend(root .. "/app")
 vim.opt.runtimepath:append(root .. "/app/after")
 
--- commands are part of the surface under test
+-- commands and keymaps are part of the surface under test
 require("config.commands")
+require("config.keymaps")
 
 vim.pack.add({ "https://github.com/nvim-lua/plenary.nvim" }, { confirm = false })

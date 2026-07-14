@@ -120,6 +120,10 @@ vim.api.nvim_create_user_command("LorePageFromSelection", function()
   require("lore.pages").from_selection()
 end, { range = true, desc = "Create a page from the selection, replace it with a link" })
 
+vim.api.nvim_create_user_command("LorePalette", function()
+  require("lore.palette").open()
+end, { desc = "Command palette" })
+
 vim.api.nvim_create_user_command("LorePane", function()
   require("lore.pane").toggle()
 end, { desc = "Toggle the links + backlinks pane" })

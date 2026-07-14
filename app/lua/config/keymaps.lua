@@ -23,3 +23,10 @@ for command, keys in pairs(keymaps) do
     vim.keymap.set("n", key, ("<Cmd>%s<CR>"):format(command), { desc = "lore: " .. command })
   end
 end
+
+-- Command palette: Cmd+Shift+P (the macOS palette chord; neovide passes
+-- it through) + Ctrl+Shift+P (terminal-ambiguous with C-p, but harmless)
+-- + a leader fallback.
+for _, key in ipairs({ "<D-S-p>", "<C-S-p>", "<leader>p" }) do
+  vim.keymap.set({ "n", "x" }, key, "<Cmd>LorePalette<CR>", { desc = "lore: LorePalette" })
+end
