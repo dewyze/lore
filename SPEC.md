@@ -264,10 +264,19 @@ admired screenshot). The largest UI piece — watch it hardest.*
 
 ## Git auto-commit (blame's dependency)
 
-- **FocusLost, debounced** (at most once per ~15 min; config number) +
-  `VimLeavePre`/`QuitPre` backstop. Attention boundaries are the natural
-  commit boundaries. On-quit alone is wrong — lore is a persistent instance,
-  quit is rare.
+- **Idle pauses are the boundaries** (CursorHold/CursorHoldI, ~4s of no
+  input). FocusLost was considered and dropped as redundant: switching
+  apps stops input, so CursorHold fires seconds later anyway — and unlike
+  a bare Logseq-style timer, pauses never land mid-word. Prior art:
+  obsidian-git's "N minutes after last change" mode is this shape.
+- Every pause runs **autosave** (`silent! noautocmd wall` — obsidian-style;
+  no-op when clean). noautocmd deliberately: BufWritePre renumbering must
+  not ride autosaves (it could move text under a mid-edit cursor), so
+  renumber stays on explicit `:w`/`:LoreRenumber`. If that proves too
+  rare, hook renumber into the debounced commit moment instead.
+- Commits ride the same pauses, **debounced** (at most once per ~15 min;
+  `autocommit_minutes` preference) + `VimLeavePre` force backstop. On-quit
+  alone is wrong — lore is a persistent instance, quit is rare.
 - The age feature only needs ~daily granularity; the debounce is headroom,
   not obligation. Start coarse.
 - Raycast scripts do **not** commit (earlier spec draft misrecorded this).
@@ -347,8 +356,8 @@ feature). Nothing else at v1. Every addition needs a named friction.
    (auto-commit and todo age depend on every vault being a repo).
 8. Picker appearance/theming (snacks highlight groups, layout presets) —
    revisit near the end; both snacks and fzf-lua are fully themeable.
-9. `wall`-before-commit on FocusLost (autosave) — commits currently
-   capture disk state only; unsaved buffer edits ride a later commit.
+9. ~~`wall`-before-commit (autosave)?~~ — resolved: yes; autosave +
+   debounced commit both ride idle pauses (see git auto-commit section).
 
 ## Prior art (all local)
 

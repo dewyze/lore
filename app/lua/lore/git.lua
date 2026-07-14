@@ -1,7 +1,11 @@
--- Vault auto-commit: attention boundaries (FocusLost, debounced) are the
--- commit boundaries, with a VimLeavePre backstop — lore is a persistent
--- instance, quit is rare. Commit-always is what the todo-age git blame
--- needs; nobody reads a private vault's log, so messages are timestamps.
+-- Vault autosave + auto-commit. Idle pauses (CursorHold/I) are the
+-- boundaries: they subsume FocusLost (switching apps stops input, so
+-- CursorHold fires seconds later) and, unlike a bare timer, never land
+-- mid-word. Every pause writes buffers (obsidian-style autosave); commits
+-- ride the same pauses through a debounce, with a VimLeavePre backstop —
+-- lore is a persistent instance, quit is rare. Commit-always is what the
+-- todo-age git blame needs; nobody reads a private vault's log, so
+-- messages are timestamps.
 local preferences = require("lore.preferences")
 local vaults = require("lore.vaults")
 
@@ -58,18 +62,26 @@ function M.reset()
   last_commit = {}
 end
 
+-- One pause boundary: write everything, then maybe commit. noautocmd so
+-- autosave has no side effects (BufWritePre renumbering could move text
+-- under a mid-edit cursor); renumber runs on explicit :w and the command.
+function M.checkpoint(opts)
+  vim.cmd("silent! noautocmd wall")
+  M.commit_all(opts)
+end
+
 function M.setup()
   local group = vim.api.nvim_create_augroup("lore_git", {})
-  vim.api.nvim_create_autocmd("FocusLost", {
+  vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
     group = group,
     callback = function()
-      M.commit_all()
+      M.checkpoint()
     end,
   })
   vim.api.nvim_create_autocmd("VimLeavePre", {
     group = group,
     callback = function()
-      M.commit_all({ force = true })
+      M.checkpoint({ force = true })
     end,
   })
 end
