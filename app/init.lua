@@ -14,6 +14,7 @@ require("lore.session").setup()
 require("lore.todo").setup()
 require("lore.git").setup()
 require("lore.pane").setup()
+require("lore.completion").setup()
 
 -- bin/lore normally passes --listen; this covers direct `NVIM_APPNAME=lore
 -- nvim` launches. Fails harmlessly if the socket is already ours.

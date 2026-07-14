@@ -12,6 +12,14 @@ function M.slugify(title)
   return slug
 end
 
+-- "rails_upgrade" -> "Rails Upgrade" (the display-title convention;
+-- filenames are the store, titles are derived)
+function M.title(slug)
+  return (slug:gsub("_", " "):gsub("(%a)(%w*)", function(first, rest)
+    return first:upper() .. rest
+  end))
+end
+
 local function active_vault()
   local vault = vaults.active()
   if not vault then

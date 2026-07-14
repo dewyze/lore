@@ -15,11 +15,7 @@ function M.list()
 end
 
 local function title_from_buffer()
-  local slug = vim.fn.expand("%:t:r")
-  local title = slug:gsub("_", " "):gsub("(%a)([%w]*)", function(first, rest)
-    return first:upper() .. rest
-  end)
-  return title
+  return require("lore.pages").title(vim.fn.expand("%:t:r"))
 end
 
 function M.apply(path)
