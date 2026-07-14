@@ -22,6 +22,14 @@ vim.api.nvim_create_user_command("LoreVaultAdd", function(opts)
   end
 end, { nargs = "+", complete = "dir", desc = "Register a vault (scaffold + git init)" })
 
+vim.api.nvim_create_user_command("LoreTodoSort", function()
+  require("lore.todo").sort()
+end, { desc = "Sort todo lists by state, subtree-aware" })
+
+vim.api.nvim_create_user_command("LoreTodoArchive", function()
+  require("lore.todo").archive()
+end, { desc = "Sweep [x] subtrees into archive.md" })
+
 vim.api.nvim_create_user_command("LoreVaultList", function()
   local lines = {}
   local active = vaults.active()

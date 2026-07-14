@@ -8,6 +8,7 @@ require("config.commands")
 
 require("lore.checkbox").setup()
 require("lore.session").setup()
+require("lore.todo").setup()
 
 -- bin/lore normally passes --listen; this covers direct `NVIM_APPNAME=lore
 -- nvim` launches. Fails harmlessly if the socket is already ours.

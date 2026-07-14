@@ -38,7 +38,8 @@ local function with_state(line, state)
   return nil
 end
 
-local function current_state(line)
+-- The state char of a checkbox line, or nil (also consumed by todo sort).
+function M.state(line)
   for _, pattern in ipairs(BOX_PATTERNS) do
     local _, state = line:match(pattern)
     if state then
@@ -50,7 +51,7 @@ end
 
 function M.cycle()
   local line = vim.api.nvim_get_current_line()
-  local state = current_state(line)
+  local state = M.state(line)
   local next_state = state and (CYCLE[state] or " ") or " "
   local updated = with_state(line, next_state)
   if updated then
