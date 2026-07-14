@@ -68,6 +68,25 @@ function M.tags()
   })
 end
 
+function M.templates()
+  local found = require("lore.templates").list()
+  if #found == 0 then
+    return vim.notify("no templates in this vault (templates/*.md)", vim.log.levels.INFO)
+  end
+  picker()({
+    title = "Templates",
+    items = vim.tbl_map(function(path)
+      return { text = vim.fn.fnamemodify(path, ":t:r"), file = path, path = path }
+    end, found),
+    format = "text",
+    layout = { preset = "select" },
+    confirm = function(p, item)
+      p:close()
+      require("lore.templates").apply(item.path)
+    end,
+  })
+end
+
 function M.vaults()
   local items = {}
   local active = vaults.active()

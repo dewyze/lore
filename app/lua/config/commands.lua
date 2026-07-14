@@ -86,6 +86,32 @@ vim.api.nvim_create_user_command("LoreTags", function()
   require("lore.pickers").tags()
 end, { desc = "Search tags in the active vault" })
 
+vim.api.nvim_create_user_command("LoreNewPage", function(opts)
+  local function create_and_open(title)
+    local ok, result = pcall(require("lore.pages").create, title)
+    if not ok then
+      return notify_error(result)
+    end
+    vim.cmd.edit(vim.fn.fnameescape(result))
+  end
+  if opts.args ~= "" then
+    return create_and_open(opts.args)
+  end
+  vim.ui.input({ prompt = "page title" }, function(title)
+    if title then
+      create_and_open(title)
+    end
+  end)
+end, { nargs = "*", desc = "Create a page in unsorted/ and open it" })
+
+vim.api.nvim_create_user_command("LorePageFromSelection", function()
+  require("lore.pages").from_selection()
+end, { range = true, desc = "Create a page from the selection, replace it with a link" })
+
+vim.api.nvim_create_user_command("LoreTemplate", function()
+  require("lore.pickers").templates()
+end, { desc = "Apply a template into the current buffer" })
+
 vim.api.nvim_create_user_command("LoreInbox", function(opts)
   local function capture(text)
     local ok, err = pcall(require("lore.inbox").append, text)
