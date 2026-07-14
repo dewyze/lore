@@ -116,6 +116,14 @@ vim.api.nvim_create_user_command("LorePageFromSelection", function()
   require("lore.pages").from_selection()
 end, { range = true, desc = "Create a page from the selection, replace it with a link" })
 
+vim.api.nvim_create_user_command("LorePane", function()
+  require("lore.pane").toggle()
+end, { desc = "Toggle the links + backlinks pane" })
+
+vim.api.nvim_create_user_command("LoreTree", function()
+  vim.cmd("Neotree toggle")
+end, { desc = "Toggle the file tree" })
+
 vim.api.nvim_create_user_command("LoreFrontmatter", function()
   require("lore.navigate").frontmatter_toggle()
 end, { desc = "Jump to frontmatter (and back)" })

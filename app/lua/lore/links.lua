@@ -33,6 +33,32 @@ function M.target_at_cursor()
   end
 end
 
+-- All markdown links in a buffer (file targets only, urls excluded) —
+-- the pane's "Links" section.
+function M.outgoing(bufnr)
+  local found = {}
+  local lines = vim.api.nvim_buf_get_lines(bufnr or 0, 0, -1, false)
+  for lnum, line in ipairs(lines) do
+    for title, target in line:gmatch("%[([^%]]*)%]%(([^%)]+)%)") do
+      if not target:match("^%a+://") then
+        table.insert(found, { title = title, target = target, lnum = lnum })
+      end
+    end
+  end
+  return found
+end
+
+-- Absolute path for a link target: vault-rooted when /-relative,
+-- base_dir-relative otherwise. Anchors stripped.
+function M.resolve_target(target, base_dir)
+  target = target:gsub("#.*$", "")
+  local path = M.resolve(target)
+  if path:sub(1, 1) ~= "/" then
+    path = base_dir .. "/" .. path
+  end
+  return path
+end
+
 function M.follow()
   local target = M.target_at_cursor() or vim.fn.expand("<cfile>")
   if target == "" then
@@ -41,11 +67,7 @@ function M.follow()
   if target:match("^%a+://") then
     return vim.ui.open(target)
   end
-  target = target:gsub("#.*$", "") -- strip anchors
-  local path = M.resolve(target)
-  if path:sub(1, 1) ~= "/" then
-    path = vim.fn.expand("%:p:h") .. "/" .. path
-  end
+  local path = M.resolve_target(target, vim.fn.expand("%:p:h"))
   if vim.fn.filereadable(path) == 0 then
     vim.fn.mkdir(vim.fn.fnamemodify(path, ":h"), "p")
     vim.fn.writefile({}, path)
