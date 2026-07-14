@@ -11,6 +11,15 @@ vim.opt_local.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 vim.opt_local.foldlevel = 99
 vim.opt_local.foldtext = ""
 
+-- root-relative /path.md links resolve at the vault root
+vim.opt_local.includeexpr = "v:lua.require'lore.links'.resolve(v:fname)"
+
+local links = require("lore.links")
+local navigate = require("lore.navigate")
+vim.keymap.set("n", "gf", links.follow, { buffer = true, desc = "follow link (create if missing)" })
+vim.keymap.set({ "n", "x" }, "]]", navigate.next_heading, { buffer = true, desc = "next heading" })
+vim.keymap.set({ "n", "x" }, "[[", navigate.prev_heading, { buffer = true, desc = "previous heading" })
+
 local lists = require("lore.lists")
 vim.keymap.set("i", "<CR>", lists.press_enter, { buffer = true, desc = "continue list item" })
 vim.keymap.set("n", "o", lists.open_below, { buffer = true, desc = "open list item below" })

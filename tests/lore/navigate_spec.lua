@@ -1,0 +1,50 @@
+local navigate = require("lore.navigate")
+
+local function buf_with(lines)
+  vim.cmd.enew()
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+end
+
+local function row()
+  return vim.api.nvim_win_get_cursor(0)[1]
+end
+
+describe("lore.navigate", function()
+  describe("frontmatter_toggle", function()
+    it("jumps into the frontmatter and back", function()
+      buf_with({ "---", "date: 2026-07-14", "---", "", "body text" })
+      vim.api.nvim_win_set_cursor(0, { 5, 0 })
+      navigate.frontmatter_toggle()
+      assert.equals(2, row())
+      navigate.frontmatter_toggle()
+      assert.equals(5, row())
+    end)
+
+    it("does nothing without frontmatter", function()
+      buf_with({ "just text" })
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+      navigate.frontmatter_toggle()
+      assert.equals(1, row())
+    end)
+  end)
+
+  describe("headings", function()
+    it("moves to the next and previous heading", function()
+      buf_with({ "intro", "# One", "text", "## Two", "text" })
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+      navigate.next_heading()
+      assert.equals(2, row())
+      navigate.next_heading()
+      assert.equals(4, row())
+      navigate.prev_heading()
+      assert.equals(2, row())
+    end)
+
+    it("stays put past the last heading", function()
+      buf_with({ "# Only", "tail" })
+      vim.api.nvim_win_set_cursor(0, { 2, 0 })
+      navigate.next_heading()
+      assert.equals(2, row())
+    end)
+  end)
+end)

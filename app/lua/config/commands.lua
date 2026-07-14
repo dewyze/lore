@@ -108,6 +108,10 @@ vim.api.nvim_create_user_command("LorePageFromSelection", function()
   require("lore.pages").from_selection()
 end, { range = true, desc = "Create a page from the selection, replace it with a link" })
 
+vim.api.nvim_create_user_command("LoreFrontmatter", function()
+  require("lore.navigate").frontmatter_toggle()
+end, { desc = "Jump to frontmatter (and back)" })
+
 vim.api.nvim_create_user_command("LoreTemplate", function()
   require("lore.pickers").templates()
 end, { desc = "Apply a template into the current buffer" })
