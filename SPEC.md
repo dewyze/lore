@@ -160,9 +160,11 @@ files; they never commit (see git auto-commit section).
 - Link completion: trigger (`[[` per okf's research) → fuzzy page completion →
   inserts standard md link. Fresh implementation; okf's blink.cmp source is
   the reference.
-- List continuation (Enter/`o` repeats `- ` / `- [ ]`) — via
-  `comments`/`formatoptions` options, not code. Known edge: continuing from
-  `[x]` falls back to plain `- `; acceptable.
+- List continuation (Enter/`o`/`O`) — owned tada-style mappings. (Friction
+  named 13 Jul: the options-only route can't continue from `[x]` or custom
+  states.) Continuation from any checkbox state inserts a fresh `- [ ]` —
+  new items are born todo, state is never cloned. Plain bullets repeat,
+  ordered items increment, Enter on an empty item clears its marker.
 - Context-aware Tab/S-Tab: on a list item → indent/dedent (`<C-t>`/`<C-d>`);
   anywhere else → literal Tab. Normal-mode variant maybe C-Tab —
   **neovide-only** (terminals can't distinguish C-Tab from Tab).
