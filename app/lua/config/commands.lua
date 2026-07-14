@@ -56,17 +56,49 @@ end, {
 })
 
 vim.api.nvim_create_user_command("LoreVaultSwitch", function(opts)
+  if opts.args == "" then
+    return require("lore.pickers").vaults()
+  end
   local ok, err = pcall(vaults.switch, opts.args)
   if not ok then
     return notify_error(err)
   end
   session.open_vault(vaults.active())
 end, {
-  nargs = 1,
+  nargs = "?",
   complete = function()
     return vim.tbl_map(function(vault)
       return vault.name
     end, vaults.list())
   end,
-  desc = "Switch the active vault",
+  desc = "Switch the active vault (picker with no argument)",
 })
+
+vim.api.nvim_create_user_command("LoreFiles", function()
+  require("lore.pickers").files()
+end, { desc = "Find file in the active vault" })
+
+vim.api.nvim_create_user_command("LoreGrep", function()
+  require("lore.pickers").grep()
+end, { desc = "Live grep the active vault" })
+
+vim.api.nvim_create_user_command("LoreTags", function()
+  require("lore.pickers").tags()
+end, { desc = "Search tags in the active vault" })
+
+vim.api.nvim_create_user_command("LoreInbox", function(opts)
+  local function capture(text)
+    local ok, err = pcall(require("lore.inbox").append, text)
+    if not ok then
+      notify_error(err)
+    end
+  end
+  if opts.args ~= "" then
+    return capture(opts.args)
+  end
+  vim.ui.input({ prompt = "inbox" }, function(text)
+    if text then
+      capture(text)
+    end
+  end)
+end, { nargs = "*", desc = "Append a line to the active vault's inbox" })

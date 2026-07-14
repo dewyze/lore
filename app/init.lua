@@ -2,6 +2,7 @@
 -- loaded via NVIM_APPNAME=lore (see bin/lore).
 require("config.options")
 require("config.pack")
+require("config.plugins")
 require("config.treesitter")
 require("config.commands")
 

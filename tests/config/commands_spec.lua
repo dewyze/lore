@@ -41,6 +41,12 @@ describe("Lore vault commands", function()
     assert.same({ "personal" }, completions)
   end)
 
+  it("LoreInbox with arguments appends to the active vault's inbox", function()
+    vim.cmd(("LoreVaultAdd personal %s"):format(vault_dir))
+    vim.cmd("LoreInbox remember the milk")
+    assert.same({ "remember the milk" }, vim.fn.readfile(vault_dir .. "/inbox.md"))
+  end)
+
   it("surfaces errors as clean messages, not tracebacks", function()
     -- headless, an error-level notify escalates through vim.cmd; assert the
     -- message is the domain error, stripped of file:line noise
