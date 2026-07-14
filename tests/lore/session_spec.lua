@@ -1,0 +1,40 @@
+local preferences = require("lore.preferences")
+local vaults = require("lore.vaults")
+local session = require("lore.session")
+
+describe("lore.session", function()
+  local prefs_dir, vault_dir
+
+  before_each(function()
+    prefs_dir = vim.fn.tempname()
+    vault_dir = vim.fn.tempname()
+    preferences.set_directory(prefs_dir)
+  end)
+
+  after_each(function()
+    preferences.reset_directory()
+    vim.fn.delete(prefs_dir, "rf")
+    vim.fn.delete(vault_dir, "rf")
+  end)
+
+  describe("open_vault", function()
+    it("cds to the vault and edits todo.md", function()
+      vaults.add("personal", vault_dir)
+      session.open_vault(vaults.active())
+      assert.equals(vaults.active().path, vim.fn.getcwd())
+      assert.equals("todo.md", vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":t"))
+    end)
+  end)
+
+  describe("startup", function()
+    it("opens the active vault when there is one", function()
+      vaults.add("personal", vault_dir)
+      session.startup()
+      assert.equals("todo.md", vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":t"))
+    end)
+
+    it("does not error with an empty registry", function()
+      assert.has_no_error(session.startup)
+    end)
+  end)
+end)

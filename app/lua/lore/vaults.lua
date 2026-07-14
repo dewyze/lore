@@ -29,8 +29,11 @@ function M.add(name, path)
   if vaults[name] then
     error(("vault %q is already registered"):format(name))
   end
-  path = vim.fs.normalize((vim.fn.fnamemodify(vim.fn.expand(path), ":p"):gsub("/$", "")))
+  path = vim.fn.fnamemodify(vim.fn.expand(path), ":p")
   scaffold(path)
+  -- store the canonical path (macOS: /var is a symlink to /private/var) so
+  -- later cwd/path comparisons never chase symlinks
+  path = assert(vim.uv.fs_realpath(path))
   vaults[name] = path
   preferences.set("vaults", vaults)
   if not preferences.get("active_vault") then
