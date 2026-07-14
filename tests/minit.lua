@@ -5,5 +5,9 @@ local source = debug.getinfo(1, "S").source:sub(2)
 local root = vim.fs.normalize(vim.fs.dirname(vim.fs.dirname(source)))
 
 vim.opt.runtimepath:prepend(root .. "/app")
+vim.opt.runtimepath:append(root .. "/app/after")
+
+-- commands are part of the surface under test
+require("config.commands")
 
 vim.pack.add({ "https://github.com/nvim-lua/plenary.nvim" }, { confirm = false })

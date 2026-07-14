@@ -1,4 +1,5 @@
 -- User commands are the app's real interface; keymaps only dispatch here.
+local checkbox = require("lore.checkbox")
 local vaults = require("lore.vaults")
 local session = require("lore.session")
 
@@ -33,6 +34,26 @@ vim.api.nvim_create_user_command("LoreVaultList", function()
   end
   vim.notify(table.concat(lines, "\n"), vim.log.levels.INFO)
 end, { desc = "List vaults (* = active)" })
+
+vim.api.nvim_create_user_command("LoreCheckboxCycle", function()
+  checkbox.cycle()
+end, { desc = "Cycle checkbox: [ ] -> [/] -> [x] -> [ ]" })
+
+local CHECKBOX_STATES = { todo = " ", in_progress = "/", done = "x", blocked = "!", dropped = "-" }
+
+vim.api.nvim_create_user_command("LoreCheckboxSet", function(opts)
+  local state = CHECKBOX_STATES[opts.args]
+  if not state then
+    return notify_error(("unknown checkbox state %q"):format(opts.args))
+  end
+  checkbox.set(state)
+end, {
+  nargs = 1,
+  complete = function()
+    return vim.tbl_keys(CHECKBOX_STATES)
+  end,
+  desc = "Set checkbox state explicitly",
+})
 
 vim.api.nvim_create_user_command("LoreVaultSwitch", function(opts)
   local ok, err = pcall(vaults.switch, opts.args)
