@@ -61,6 +61,17 @@ describe("lore.pages", function()
     end)
   end)
 
+  describe("from_word", function()
+    it("replaces the word under the cursor with a link to a new page", function()
+      vim.cmd.enew()
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, { "ask infra about it" })
+      vim.api.nvim_win_set_cursor(0, { 1, 5 }) -- on "infra"
+      pages.from_word()
+      assert.equals("ask [infra](/unsorted/infra.md) about it", vim.api.nvim_get_current_line())
+      assert.equals(1, vim.fn.filereadable(vault_dir .. "/unsorted/infra.md"))
+    end)
+  end)
+
   describe("from_selection", function()
     it("replaces the selected text with a link to the new page", function()
       vim.cmd.enew()

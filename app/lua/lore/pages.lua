@@ -50,6 +50,35 @@ function M.link_for(path)
   return (path:gsub("^" .. vim.pesc(vault.path), ""))
 end
 
+-- Replace the word under the cursor with a link to a new page titled by it.
+function M.from_word()
+  local word = vim.fn.expand("<cword>")
+  if word == "" then
+    return vim.notify("no word under cursor", vim.log.levels.WARN)
+  end
+  local line = vim.api.nvim_get_current_line()
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+  -- find the <cword> occurrence containing the cursor
+  local init, start_col, end_col = 1, nil, nil
+  while true do
+    local s, e = line:find(word, init, true)
+    if not s then
+      break
+    end
+    if col + 1 >= s and col + 1 <= e then
+      start_col, end_col = s, e
+      break
+    end
+    init = e + 1
+  end
+  if not start_col then
+    return vim.notify("no word under cursor", vim.log.levels.WARN)
+  end
+  local path = M.create(word)
+  local link = ("[%s](%s)"):format(word, M.link_for(path))
+  vim.api.nvim_buf_set_text(0, row - 1, start_col - 1, row - 1, end_col, { link })
+end
+
 -- Replace the visual selection (single line) with a markdown link to a
 -- newly created page titled by the selected text.
 function M.from_selection()

@@ -13,6 +13,7 @@ local COMMANDS = {
   -- New
   { cmd = "LoreNewPage", display = "New > Page" },
   { cmd = "LorePageFromSelection", display = "New > Page From Selection" },
+  { cmd = "LorePageFromWord", display = "New > Page From Word" },
 
   -- Todo
   { cmd = "LoreTodoSort", display = "Todo > Sort" },
