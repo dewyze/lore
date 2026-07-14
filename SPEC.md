@@ -362,18 +362,25 @@ feature). Nothing else at v1. Every addition needs a named friction.
 1. ~~Vault path(s)~~ — resolved: registry in `preferences.json` via
    `:LoreVaultAdd`; nothing baked in.
 2. ~~Picker~~ — resolved: snacks.picker ("fine for now, we can try it").
-3. Normal-mode indent key (C-Tab neovide-only, or skip normal-mode entirely).
-4. Todo age display mechanism (virtual text / sort factor / on-demand).
+3. ~~Normal-mode indent key~~ — resolved: nothing needed. Insert mode has
+   Tab/S-Tab (aliasing vim's native i_CTRL-T/i_CTRL-D); normal mode's
+   native `>>`/`<<` suffice.
+4. Todo age display — leaning **virtual text with age-tinted highlights**
+   (extmark chunks carry their own colors; fresh=dim → stale=warm).
+   Finalize at build time.
 5. ~~Auto-commit debounce default~~ — resolved: 15 min (config number).
-6. Keybindings — okf's scheme as defaults; full reassignment pending the
-   semantic-keybinding refactor.
+6. Keybindings — okf's scheme as defaults; the semantic-keybinding
+   refactor happens at the end, as its own effort.
 7. ~~Does `:LoreVaultAdd` `git init` a non-repo path?~~ — resolved: yes
    (auto-commit and todo age depend on every vault being a repo).
 8. Picker appearance/theming (snacks highlight groups, layout presets) —
    revisit near the end; both snacks and fzf-lua are fully themeable.
 9. ~~`wall`-before-commit (autosave)?~~ — resolved: yes; autosave +
    debounced commit both ride idle pauses (see git auto-commit section).
-10. Raycast meeting-note script (`~/dev/raycast/scripts/lore-meeting-note.sh`)
+10. Vault ownership/mixing (personal vs work, cross-vault search) —
+    parked. May resolve to one full vault depending on the new company's
+    rules; revisit before real content accumulates in the wrong git.
+11. Raycast meeting-note script (`~/dev/raycast/scripts/lore-meeting-note.sh`)
     is untested against live icalBuddy output — parser written from
     documented format. Test on a day with real meetings; if parsing is
     off, capture `icalBuddy -nc -b "" -li 1 -ea -iep "title,attendees"
