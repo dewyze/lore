@@ -20,6 +20,10 @@ vim.keymap.set("n", "gf", links.follow, { buffer = true, desc = "follow link (cr
 vim.keymap.set({ "n", "x" }, "]]", navigate.next_heading, { buffer = true, desc = "next heading" })
 vim.keymap.set({ "n", "x" }, "[[", navigate.prev_heading, { buffer = true, desc = "previous heading" })
 
+vim.keymap.set("n", "p", function()
+  require("lore.urls").paste()
+end, { buffer = true, desc = "paste (urls become titled links)" })
+
 vim.keymap.set("i", "[[", function()
   require("lore.completion").trigger()
 end, { buffer = true, desc = "complete a page link" })
