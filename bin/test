@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Run the lua test suite, isolated under NVIM_APPNAME=lore-test.
+# Usage: bin/test [path]   (default: tests/)
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+target="${1:-tests}"
+
+NVIM_APPNAME=lore-test nvim --headless -u tests/minit.lua \
+  -c "lua require('plenary.test_harness').test_directory('$target', { minimal_init = 'tests/minit.lua' })"

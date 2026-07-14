@@ -341,8 +341,8 @@ feature). Nothing else at v1. Every addition needs a named friction.
 5. ~~Auto-commit debounce default~~ — resolved: 15 min (config number).
 6. Keybindings — okf's scheme as defaults; full reassignment pending the
    semantic-keybinding refactor.
-7. Does `:LoreVaultAdd` `git init` a non-repo path? (Auto-commit and todo
-   age silently depend on every vault being a repo.)
+7. ~~Does `:LoreVaultAdd` `git init` a non-repo path?~~ — resolved: yes
+   (auto-commit and todo age depend on every vault being a repo).
 
 ## Prior art (all local)
 
