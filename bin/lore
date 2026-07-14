@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# lore launcher: focus the running instance, or cold-launch one.
+#
+# A stale socket (left by a crash) HANGS on connect rather than failing
+# (okf research) — so probe with --remote-expr under a manual timeout;
+# stock macOS has no timeout(1).
+set -euo pipefail
+
+SOCK=/tmp/lore.sock
+EDITOR_BIN="${LORE_EDITOR:-neovide}"
+
+probe() {
+  [ -S "$SOCK" ] || return 1
+  nvim --server "$SOCK" --remote-expr 1 >/dev/null 2>&1 &
+  local pid=$!
+  for _ in $(seq 20); do
+    if ! kill -0 "$pid" 2>/dev/null; then
+      wait "$pid"
+      return $?
+    fi
+    sleep 0.1
+  done
+  kill "$pid" 2>/dev/null || true
+  wait "$pid" 2>/dev/null || true
+  return 1
+}
+
+if probe; then
+  if [ $# -gt 0 ]; then
+    nvim --server "$SOCK" --remote "$@"
+  fi
+  # Only neovide knows this command; ignore failure under terminal nvim.
+  nvim --server "$SOCK" --remote-send '<Cmd>NeovideFocus<CR>' 2>/dev/null || true
+else
+  rm -f "$SOCK"
+  if [ "$(basename "$EDITOR_BIN")" = "neovide" ]; then
+    exec env NVIM_APPNAME=lore "$EDITOR_BIN" --fork -- --listen "$SOCK" "$@"
+  else
+    exec env NVIM_APPNAME=lore "$EDITOR_BIN" --listen "$SOCK" "$@"
+  fi
+fi
