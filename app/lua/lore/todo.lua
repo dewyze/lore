@@ -59,6 +59,11 @@ local function top_level_lists(bufnr)
   return lists
 end
 
+-- Public view of the list structure (the age display maps items too).
+function M.lists(bufnr)
+  return top_level_lists(bufnr or vim.api.nvim_get_current_buf())
+end
+
 local function segment(all_lines, item)
   local lines = {}
   for row = item.start_row, item.end_row - 1 do

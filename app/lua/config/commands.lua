@@ -26,6 +26,10 @@ vim.api.nvim_create_user_command("LoreRenumber", function()
   require("lore.lists").renumber()
 end, { desc = "Renumber ordered lists" })
 
+vim.api.nvim_create_user_command("LoreTodoAge", function()
+  require("lore.age").toggle()
+end, { desc = "Toggle todo age badges" })
+
 vim.api.nvim_create_user_command("LoreTodoSort", function()
   require("lore.todo").sort()
 end, { desc = "Sort todo lists by state, subtree-aware" })

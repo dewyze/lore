@@ -305,9 +305,9 @@ admired screenshot). The largest UI piece — watch it hardest.*
   triggering file-changed prompts.
 - Commit messages: auto-timestamp. Nobody reads a private vault's log; blame
   only needs dates.
-- **Push is deferred.** Local-first; commit-always is what blame needs.
-  Sync strategy (enterprise vs public remotes, background push) is a
-  separate later decision.
+- **Push: always manual** (resolved 15 Jul 2026). Local-first;
+  commit-always is what blame needs. John pushes when he wants; lore
+  never touches remotes.
 - Cost reality: ~15 text commits/day ≈ a few MB/year packed. Git's pain
   points (100k+ commits, binaries) are unreachable here. **One real risk:
   images** — binaries don't delta-compress; if the vault accrues
@@ -350,8 +350,8 @@ feature). Nothing else at v1. Every addition needs a named friction.
    LLM workflow genuinely needs machine state transitions.
 4. **Contacts import/sync** (vCard) — cut harder than deferred; person pages
    are born manually when there's something to write.
-5. **Push/sync strategy**, todo age *display* polish, template
-   `default_dir:` hints, image handling.
+5. Template `default_dir:` hints, image handling. (~~Push strategy~~ →
+   always manual; ~~age display~~ → built.)
 
 ## Anti-goals
 
@@ -382,9 +382,13 @@ feature). Nothing else at v1. Every addition needs a named friction.
 3. ~~Normal-mode indent key~~ — resolved: nothing needed. Insert mode has
    Tab/S-Tab (aliasing vim's native i_CTRL-T/i_CTRL-D); normal mode's
    native `>>`/`<<` suffice.
-4. Todo age display — leaning **virtual text with age-tinted highlights**
-   (extmark chunks carry their own colors; fresh=dim → stale=warm).
-   Finalize at build time.
+4. ~~Todo age display~~ — resolved and built (15 Jul 2026): eol virtual
+   text badges on todo.md items ("· 3d"/"· 2w"/"· 2mo", nothing under 2
+   days), tinted by tier (Comment → DiagnosticWarn → DiagnosticError).
+   Item age = most recent touch anywhere in its subtree, from one
+   `git blame --line-porcelain` call. Refreshes on BufEnter/CursorHold
+   (autosave is noautocmd, so idle is the "disk is fresh" signal);
+   `:LoreTodoAge` toggles.
 5. ~~Auto-commit debounce default~~ — resolved: 15 min (config number).
 6. Keybindings — okf's scheme as defaults; the semantic-keybinding
    refactor happens at the end, as its own effort.
