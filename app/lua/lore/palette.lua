@@ -22,7 +22,7 @@ local COMMANDS = {
   { cmd = "LoreTodoArchive", display = "Todo > Archive Done" },
   { cmd = "LoreCheckboxCycle", display = "Todo > Cycle Checkbox" },
   { cmd = "LoreCheckboxSet blocked", display = "Todo > Set Blocked" },
-  { cmd = "LoreTodoAge", display = "Todo > Toggle Age Badges" },
+  { cmd = "LoreDue", display = "Find > Due" },
 
   -- Buffer
   { cmd = "LoreTemplate", display = "Buffer > Apply Template" },

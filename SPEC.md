@@ -273,15 +273,19 @@ admired screenshot). The largest UI piece — watch it hardest.*
 - **Archive:** explicit sweep command moves `[x]` subtrees to `archive.md`,
   stamped with the archive date. Never automatic — items must not vanish
   unwatched.
-- **Age ("how long has this been hanging"):** `git blame --porcelain todo.md`
-  — one async call returns every line's last-touched timestamp; parse once.
-  Last-touched (not created) is the *correct* staleness semantic: a line you
-  touched yesterday isn't hanging. Day-level resolution is all the feature
-  needs. `-L` exists for single lines, `--since=` as a depth escape hatch —
-  neither needed at vault scale. Display mechanism (virtual text? sort
-  input?) undecided — decide when building.
+- **Age: built, then cut** (15 Jul 2026 — same day). blame-based staleness
+  badges were superseded by `@due` within hours of landing: John is
+  content with undated items sitting indefinitely; only asserted
+  commitments deserve escalation. Textbook features-ahead-of-use; the
+  implementation lives in git history if it's ever missed.
+- **`@due(YYYY-MM-DD)` display:** the tint colors John's own inline token
+  (machine adds no text). Plain beyond the warn horizon, warm inside it,
+  hot inside the urgent horizon, overdue visually distinct. Horizons are
+  integers (days) in preferences: `due_warn_days` (7), `due_urgent_days`
+  (2). `:LoreDue` = vault-wide rg view, soonest first — meeting notes and
+  project pages participate, not just todo.md.
 
-## Git auto-commit (blame's dependency)
+## Git auto-commit (durability + history)
 
 - **Idle pauses are the boundaries** (CursorHold/CursorHoldI, ~4s of no
   input). FocusLost was considered and dropped as redundant: switching
@@ -296,8 +300,8 @@ admired screenshot). The largest UI piece — watch it hardest.*
 - Commits ride the same pauses, **debounced** (at most once per ~15 min;
   `autocommit_minutes` preference) + `VimLeavePre` force backstop. On-quit
   alone is wrong — lore is a persistent instance, quit is rare.
-- The age feature only needs ~daily granularity; the debounce is headroom,
-  not obligation. Start coarse.
+  (Originally justified by the age feature's blame needs; age is cut, but
+  durable history earns the commits on its own.)
 - Raycast scripts do **not** commit (earlier spec draft misrecorded this).
   External writes ride the next lore auto-commit; day-level blame
   granularity doesn't care. lore sets `autoread` + `checktime` on
@@ -305,9 +309,8 @@ admired screenshot). The largest UI piece — watch it hardest.*
   triggering file-changed prompts.
 - Commit messages: auto-timestamp. Nobody reads a private vault's log; blame
   only needs dates.
-- **Push: always manual** (resolved 15 Jul 2026). Local-first;
-  commit-always is what blame needs. John pushes when he wants; lore
-  never touches remotes.
+- **Push: always manual** (resolved 15 Jul 2026). Local-first; John
+  pushes when he wants; lore never touches remotes.
 - Cost reality: ~15 text commits/day ≈ a few MB/year packed. Git's pain
   points (100k+ commits, binaries) are unreachable here. **One real risk:
   images** — binaries don't delta-compress; if the vault accrues
@@ -351,7 +354,7 @@ feature). Nothing else at v1. Every addition needs a named friction.
 4. **Contacts import/sync** (vCard) — cut harder than deferred; person pages
    are born manually when there's something to write.
 5. Template `default_dir:` hints, image handling. (~~Push strategy~~ →
-   always manual; ~~age display~~ → built.)
+   always manual; ~~age display~~ → built then cut.)
 
 ## Anti-goals
 
@@ -382,13 +385,8 @@ feature). Nothing else at v1. Every addition needs a named friction.
 3. ~~Normal-mode indent key~~ — resolved: nothing needed. Insert mode has
    Tab/S-Tab (aliasing vim's native i_CTRL-T/i_CTRL-D); normal mode's
    native `>>`/`<<` suffice.
-4. ~~Todo age display~~ — resolved and built (15 Jul 2026): eol virtual
-   text badges on todo.md items ("· 3d"/"· 2w"/"· 2mo", nothing under 2
-   days), tinted by tier (Comment → DiagnosticWarn → DiagnosticError).
-   Item age = most recent touch anywhere in its subtree, from one
-   `git blame --line-porcelain` call. Refreshes on BufEnter/CursorHold
-   (autosave is noautocmd, so idle is the "disk is fresh" signal);
-   `:LoreTodoAge` toggles.
+4. ~~Todo age display~~ — built 15 Jul, cut hours later: `@due`
+   supersedes it (see todo.md section). Undated items may sit.
 5. ~~Auto-commit debounce default~~ — resolved: 15 min (config number).
 6. Keybindings — okf's scheme as defaults; the semantic-keybinding
    refactor happens at the end, as its own effort.
