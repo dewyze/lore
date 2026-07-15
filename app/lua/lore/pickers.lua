@@ -33,6 +33,87 @@ function M.grep()
   end
 end
 
+function M.grep_word()
+  local vault = active_vault()
+  if vault then
+    picker().grep_word({ cwd = vault.path })
+  end
+end
+
+-- \nf: pick an existing folder, then name the page.
+function M.new_page_folder()
+  local vault = active_vault()
+  if not vault then
+    return
+  end
+  local dirs = {}
+  for _, dir in ipairs(vim.fn.glob(vault.path .. "/**/", true, true)) do
+    local relative = dir:sub(#vault.path + 2):gsub("/$", "")
+    if relative ~= "" then
+      table.insert(dirs, relative)
+    end
+  end
+  table.sort(dirs)
+  if #dirs == 0 then
+    return vim.notify("no folders yet", vim.log.levels.INFO)
+  end
+  picker()({
+    title = "New page in…",
+    items = vim.tbl_map(function(dir)
+      return { text = dir }
+    end, dirs),
+    format = "text",
+    layout = { preset = "select" },
+    confirm = function(p, item)
+      p:close()
+      vim.ui.input({ prompt = ("page title (%s/)"):format(item.text) }, function(title)
+        if not title then
+          return
+        end
+        local ok, result = pcall(require("lore.pages").create, title, item.text)
+        if not ok then
+          return vim.notify(result, vim.log.levels.ERROR)
+        end
+        vim.cmd.edit(vim.fn.fnameescape(result))
+      end)
+    end,
+  })
+end
+
+-- \npf: pick a project hub, then name the file that goes under it.
+function M.new_project_file()
+  local vault = active_vault()
+  if not vault then
+    return
+  end
+  local pages = require("lore.pages")
+  local hubs = vim.fn.glob(vault.path .. "/projects/*.md", true, true)
+  if #hubs == 0 then
+    return vim.notify("no projects yet — LoreNewPage projects/ {title}", vim.log.levels.INFO)
+  end
+  picker()({
+    title = "File under project…",
+    items = vim.tbl_map(function(hub)
+      return { text = pages.title(vim.fn.fnamemodify(hub, ":t:r")), hub = hub }
+    end, hubs),
+    format = "text",
+    layout = { preset = "select" },
+    confirm = function(p, item)
+      p:close()
+      vim.ui.input({ prompt = "file title" }, function(title)
+        if not title then
+          return
+        end
+        local ok, result = pcall(pages.create_in_project, item.hub, title)
+        if not ok then
+          return vim.notify(result, vim.log.levels.ERROR)
+        end
+        vim.cmd.edit(vim.fn.fnameescape(result))
+      end)
+    end,
+  })
+end
+
 -- Occurrences of one tag: inline #tag or on a frontmatter tags: line.
 function M.grep_tag(tag)
   local vault = active_vault()

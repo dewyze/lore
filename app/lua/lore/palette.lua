@@ -4,33 +4,42 @@
 local M = {}
 
 local COMMANDS = {
-  -- Find
+  -- Find / Search
   { cmd = "LoreFiles", display = "Find > Files" },
-  { cmd = "LoreGrep", display = "Find > Grep" },
   { cmd = "LoreTags", display = "Find > Tags" },
-  { cmd = "LorePane", display = "Find > Links Pane" },
+  { cmd = "LoreDue", display = "Find > Due" },
+  { cmd = "LoreGrep", display = "Search > Grep" },
+  { cmd = "LoreGrepWord", display = "Search > Word Under Cursor" },
 
   -- New
-  { cmd = "LoreNewPage", display = "New > Page (notes)" },
+  { cmd = "LoreNewPage", display = "New > Note" },
   { cmd = "LoreNewPage ideas/", display = "New > Idea" },
+  { cmd = "LoreNewPage contacts/", display = "New > Contact" },
+  { cmd = "LoreNewMeeting", display = "New > Meeting" },
   { cmd = "LoreNewPage projects/", display = "New > Project" },
+  { cmd = "LoreNewProjectFile", display = "New > File Under Project" },
+  { cmd = "LoreNewPagePick", display = "New > Page In Folder…" },
   { cmd = "LorePageFromSelection", display = "New > Page From Selection" },
   { cmd = "LorePageFromWord", display = "New > Page From Word" },
+
+  -- Go
+  { cmd = "LoreOpenTodo", display = "Go > Todo" },
+  { cmd = "LoreOpenInbox", display = "Go > Inbox" },
 
   -- Todo
   { cmd = "LoreTodoSort", display = "Todo > Sort" },
   { cmd = "LoreTodoArchive", display = "Todo > Archive Done" },
   { cmd = "LoreCheckboxCycle", display = "Todo > Cycle Checkbox" },
   { cmd = "LoreCheckboxSet blocked", display = "Todo > Set Blocked" },
-  { cmd = "LoreDue", display = "Find > Due" },
 
   -- Buffer
   { cmd = "LoreTemplate", display = "Buffer > Apply Template" },
   { cmd = "LoreFrontmatter", display = "Buffer > Frontmatter" },
   { cmd = "LoreRenumber", display = "Buffer > Renumber Lists" },
 
-  -- Capture
-  { cmd = "LoreInbox", display = "Capture > Inbox" },
+  -- Capture (append + stay)
+  { cmd = "LoreInbox", display = "Capture > Thought (inbox)" },
+  { cmd = "LoreTodoAdd", display = "Capture > Todo" },
 
   -- Vault
   { cmd = "LoreVaultSwitch", display = "Vault > Switch" },
@@ -38,6 +47,7 @@ local COMMANDS = {
 
   -- View
   { cmd = "LoreTree", display = "View > File Tree" },
+  { cmd = "LorePane", display = "View > Links Pane" },
 }
 
 local function keymap_for(command)

@@ -30,10 +30,14 @@ local function active_vault()
 end
 
 -- Create (if needed) <dir>/<slug>.md and return its absolute path.
-function M.create(title, dir)
+-- opts.date_prefix stamps the slug (meetings: 2026_07_15_team_sync.md).
+function M.create(title, dir, opts)
   local slug = M.slugify(title)
   if slug == "" then
     error("empty page title")
+  end
+  if opts and opts.date_prefix then
+    slug = os.date("%Y_%m_%d_") .. slug
   end
   local vault = active_vault()
   local target = vault.path .. "/" .. (dir or "notes")
@@ -41,6 +45,18 @@ function M.create(title, dir)
   local path = target .. "/" .. slug .. ".md"
   if vim.fn.filereadable(path) == 0 then
     vim.fn.writefile({}, path)
+  end
+  return path
+end
+
+-- A file under a project's folder (projects/ is the one place with
+-- subfolders), born linking back to its hub so it appears in the hub's
+-- backlinks pane immediately.
+function M.create_in_project(hub_path, title)
+  local slug = vim.fn.fnamemodify(hub_path, ":t:r")
+  local path = M.create(title, "projects/" .. slug)
+  if vim.fn.getfsize(path) == 0 then
+    vim.fn.writefile({ ("[%s](/projects/%s.md)"):format(M.title(slug), slug), "" }, path)
   end
   return path
 end

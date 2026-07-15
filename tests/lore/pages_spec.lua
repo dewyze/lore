@@ -53,10 +53,38 @@ describe("lore.pages", function()
       assert.equals(1, vim.fn.filereadable(path))
     end)
 
+    it("date-prefixes the slug on request", function()
+      local path = pages.create("Team Sync", "meetings", { date_prefix = true })
+      assert.equals(
+        vaults.active().path .. "/meetings/" .. os.date("%Y_%m_%d") .. "_team_sync.md",
+        path
+      )
+    end)
+
     it("errors on an empty title", function()
       assert.error_matches(function()
         pages.create("   ")
       end, "empty page title")
+    end)
+  end)
+
+  describe("create_in_project", function()
+    it("files under the project's folder, linked back to the hub", function()
+      local hub = pages.create("Rails Upgrade", "projects")
+      local path = pages.create_in_project(hub, "Load Testing Notes")
+      assert.equals(
+        vaults.active().path .. "/projects/rails_upgrade/load_testing_notes.md",
+        path
+      )
+      assert.equals("[Rails Upgrade](/projects/rails_upgrade.md)", vim.fn.readfile(path)[1])
+    end)
+
+    it("leaves an existing file's content alone", function()
+      local hub = pages.create("Rails Upgrade", "projects")
+      local path = pages.create_in_project(hub, "Notes")
+      vim.fn.writefile({ "my own words" }, path)
+      pages.create_in_project(hub, "Notes")
+      assert.same({ "my own words" }, vim.fn.readfile(path))
     end)
   end)
 

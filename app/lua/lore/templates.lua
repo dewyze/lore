@@ -18,10 +18,12 @@ local function title_from_buffer()
   return require("lore.pages").title(vim.fn.expand("%:t:r"))
 end
 
-function M.apply(path)
+-- context.title overrides the filename-derived title (meeting notes are
+-- date-prefixed, so their filenames make lousy titles).
+function M.apply(path, context)
   local lines = vim.fn.readfile(path)
   local date = os.date("%Y-%m-%d")
-  local title = title_from_buffer()
+  local title = (context and context.title) or title_from_buffer()
   lines = vim.tbl_map(function(line)
     line = line:gsub("{{date}}", date)
     line = line:gsub("{{title}}", title)

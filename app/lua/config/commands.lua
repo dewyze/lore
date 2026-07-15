@@ -133,6 +133,79 @@ vim.api.nvim_create_user_command("LorePageFromSelection", function()
   require("lore.pages").from_selection()
 end, { range = true, desc = "Create a page from the selection, replace it with a link" })
 
+vim.api.nvim_create_user_command("LoreNewMeeting", function(opts)
+  local function create(title)
+    local ok, result = pcall(require("lore.pages").create, title, "meetings", { date_prefix = true })
+    if not ok then
+      return notify_error(result)
+    end
+    vim.cmd.edit(vim.fn.fnameescape(result))
+    local template = vaults.active().path .. "/templates/meeting.md"
+    if vim.fn.filereadable(template) == 1 then
+      require("lore.templates").apply(template, { title = title })
+    end
+  end
+  if opts.args ~= "" then
+    return create(opts.args)
+  end
+  vim.ui.input({ prompt = "meeting title" }, function(title)
+    if title then
+      create(title)
+    end
+  end)
+end, { nargs = "*", desc = "Create today's meeting note (date-prefixed, template applied)" })
+
+vim.api.nvim_create_user_command("LoreNewPagePick", function()
+  require("lore.pickers").new_page_folder()
+end, { desc = "Create a page: pick the folder, then name it" })
+
+vim.api.nvim_create_user_command("LoreNewProjectFile", function()
+  require("lore.pickers").new_project_file()
+end, { desc = "Create a file under a project, linked to its hub" })
+
+vim.api.nvim_create_user_command("LoreGrepWord", function()
+  require("lore.pickers").grep_word()
+end, { desc = "Grep the vault for the word under the cursor" })
+
+vim.api.nvim_create_user_command("LoreOpenTodo", function()
+  local vault = vaults.active()
+  if not vault then
+    return notify_error("no active vault")
+  end
+  vim.cmd.edit(vim.fn.fnameescape(vault.path .. "/todo.md"))
+end, { desc = "Go to todo.md" })
+
+vim.api.nvim_create_user_command("LoreOpenInbox", function()
+  local vault = vaults.active()
+  if not vault then
+    return notify_error("no active vault")
+  end
+  vim.cmd.edit(vim.fn.fnameescape(vault.path .. "/inbox.md"))
+end, { desc = "Go to inbox.md" })
+
+vim.api.nvim_create_user_command("LoreTreeReveal", function()
+  vim.cmd("Neotree reveal")
+end, { desc = "Reveal the current file in the tree" })
+
+local RESERVED_NEW_LETTERS = { f = true, m = true, p = true }
+
+vim.api.nvim_create_user_command("LoreBindNew", function(opts)
+  local letter, folder = unpack(opts.fargs)
+  if not (letter and folder) or #letter ~= 1 then
+    return notify_error("usage: LoreBindNew {letter} {folder}")
+  end
+  if RESERVED_NEW_LETTERS[letter] then
+    return notify_error(("\\n%s is reserved (folder picker / meeting / project)"):format(letter))
+  end
+  folder = (folder:gsub("/$", ""))
+  local preferences = require("lore.preferences")
+  local bindings = preferences.get("new_page_bindings") or {}
+  bindings[letter] = folder
+  preferences.set("new_page_bindings", bindings)
+  require("config.keymaps").bind_new(letter, folder)
+  vim.notify(("\\n%s -> %s/"):format(letter, folder), vim.log.levels.INFO)
+end, { nargs = "+", desc = "Bind \\n{letter} to create pages in {folder}" })
+
 vim.api.nvim_create_user_command("LorePageFromWord", function()
   require("lore.pages").from_word()
 end, { desc = "Create a page from the word under the cursor, replace it with a link" })
@@ -157,7 +230,22 @@ vim.api.nvim_create_user_command("LoreTemplate", function()
   require("lore.pickers").templates()
 end, { desc = "Apply a template into the current buffer" })
 
+-- Capture: append + stay. Normal mode prompts; a visual range MOVES the
+-- selection out ("this thought doesn't belong here") — undo/git make
+-- that safe.
 vim.api.nvim_create_user_command("LoreInbox", function(opts)
+  if opts.range > 0 then
+    local lines = vim.api.nvim_buf_get_lines(0, opts.line1 - 1, opts.line2, false)
+    local ok, err = pcall(function()
+      for _, line in ipairs(lines) do
+        require("lore.inbox").append(line)
+      end
+    end)
+    if not ok then
+      return notify_error(err)
+    end
+    return vim.api.nvim_buf_set_lines(0, opts.line1 - 1, opts.line2, false, {})
+  end
   local function capture(text)
     local ok, err = pcall(require("lore.inbox").append, text)
     if not ok then
@@ -172,4 +260,31 @@ vim.api.nvim_create_user_command("LoreInbox", function(opts)
       capture(text)
     end
   end)
-end, { nargs = "*", desc = "Append a line to the active vault's inbox" })
+end, { nargs = "*", range = true, desc = "Capture a thought to inbox.md (visual: move selection)" })
+
+vim.api.nvim_create_user_command("LoreTodoAdd", function(opts)
+  local todo = require("lore.todo")
+  if opts.range > 0 then
+    local lines = vim.api.nvim_buf_get_lines(0, opts.line1 - 1, opts.line2, false)
+    local text = table.concat(vim.tbl_map(vim.trim, lines), " ")
+    local ok, err = pcall(todo.add, text)
+    if not ok then
+      return notify_error(err)
+    end
+    return vim.api.nvim_buf_set_lines(0, opts.line1 - 1, opts.line2, false, {})
+  end
+  local function capture(text)
+    local ok, err = pcall(todo.add, text)
+    if not ok then
+      notify_error(err)
+    end
+  end
+  if opts.args ~= "" then
+    return capture(opts.args)
+  end
+  vim.ui.input({ prompt = "todo" }, function(text)
+    if text then
+      capture(text)
+    end
+  end)
+end, { nargs = "*", range = true, desc = "Capture a todo to todo.md (visual: move selection)" })

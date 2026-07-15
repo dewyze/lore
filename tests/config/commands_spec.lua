@@ -56,6 +56,50 @@ describe("Lore vault commands", function()
     assert.same({ "remember the milk" }, vim.fn.readfile(vault_dir .. "/inbox.md"))
   end)
 
+  it("LoreTodoAdd appends a fresh todo; a range moves the selection", function()
+    vim.cmd(("LoreVaultAdd personal %s"):format(vault_dir))
+    vim.cmd("LoreTodoAdd call sarah about headcount")
+    assert.same({ "- [ ] call sarah about headcount" }, vim.fn.readfile(vault_dir .. "/todo.md"))
+    vim.cmd.enew()
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, { "keep this", "move this", "  and this" })
+    vim.cmd("2,3LoreTodoAdd")
+    assert.same({ "keep this" }, vim.api.nvim_buf_get_lines(0, 0, -1, false))
+    assert.same(
+      { "- [ ] call sarah about headcount", "- [ ] move this and this" },
+      vim.fn.readfile(vault_dir .. "/todo.md")
+    )
+  end)
+
+  it("LoreInbox with a range moves the lines verbatim", function()
+    vim.cmd(("LoreVaultAdd personal %s"):format(vault_dir))
+    vim.cmd.enew()
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, { "stays", "stray thought" })
+    vim.cmd("2LoreInbox")
+    assert.same({ "stays" }, vim.api.nvim_buf_get_lines(0, 0, -1, false))
+    assert.same({ "stray thought" }, vim.fn.readfile(vault_dir .. "/inbox.md"))
+  end)
+
+  it("LoreOpenTodo and LoreOpenInbox jump to the fixture files", function()
+    vim.cmd(("LoreVaultAdd personal %s"):format(vault_dir))
+    vim.cmd("LoreOpenInbox")
+    assert.equals("inbox.md", vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":t"))
+    vim.cmd("LoreOpenTodo")
+    assert.equals("todo.md", vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":t"))
+  end)
+
+  it("LoreBindNew persists and binds a folder alias", function()
+    vim.cmd("LoreBindNew r references")
+    assert.equals("references", preferences.get("new_page_bindings").r)
+    assert.matches("LoreNewPage references/", vim.fn.maparg("<leader>nr", "n"))
+  end)
+
+  it("LoreBindNew refuses reserved letters", function()
+    local ok, err = pcall(vim.cmd, "LoreBindNew m elsewhere")
+    assert.is_false(ok)
+    assert.matches("reserved", err)
+    assert.is_nil((preferences.get("new_page_bindings") or {}).m)
+  end)
+
   it("surfaces errors as clean messages, not tracebacks", function()
     -- headless, an error-level notify escalates through vim.cmd; assert the
     -- message is the domain error, stripped of file:line noise

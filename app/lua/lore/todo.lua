@@ -106,6 +106,22 @@ function M.sort(bufnr)
   return #edits > 0
 end
 
+-- Quick-add (the capture verb's todo half): append at end of file,
+-- top-level; the next sort slots it by state.
+function M.add(text)
+  text = vim.trim(text or "")
+  if text == "" then
+    return
+  end
+  local vault = vaults.active()
+  if not vault then
+    error("no active vault")
+  end
+  local file = assert(io.open(vault.path .. "/todo.md", "a"))
+  file:write("- [ ] " .. text .. "\n")
+  file:close()
+end
+
 -- Sweep top-level [x] subtrees into the vault's archive.md under a date
 -- heading. Explicit only — items must not vanish unwatched. Done children
 -- of unfinished parents stay put.

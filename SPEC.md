@@ -185,12 +185,35 @@ files; they never commit (see git auto-commit section).
 **Neo-tree:** stock verbs; creation location implicit from tree position.
 Nothing custom v1.
 
-**Keybindings: verbs first, keys are config data.** Every feature is a user
-command; keymaps only dispatch to commands, never inline closures. Each
-command accepts one key or a list of keys (vimoire-style normalizer, `nil`
-disables). Defaults adopt okf's settled scheme (its resolved decision 12:
-`f` find family, `n` new family, singles for inbox/frontmatter) until John's
-semantic-keybinding refactor, which will reassign keys as its own effort.
+**Keybindings: the shared grammar's lore vocabulary** (settled 15 Jul 2026
+against `~/dev/dotfiles/KEYBINDINGS.md` — five layers, domains are acts,
+double-letter = default act, find = nameable / search = by content). Keys
+dispatch to user commands, never inline closures.
+
+- `\f` find: `ff` files · `ft` tags · `fd` due
+- `\s` search: `ss` grep · `sw` word under cursor
+- `\n` new (create + go): `nn` note · `ni` idea · `nc` contact (these
+  three from `new_page_bindings` in preferences, managed by
+  `:LoreBindNew`; f/m/p reserved) · `nm` meeting (date-prefixed +
+  template) · `nf` folder picker · `npp` project hub · `npf` file under a
+  project (links its hub — projects/ is the only folder with subfolders,
+  hub page alongside its folder)
+- `\c` capture (append + stay): `cc` thought → inbox · `ct` todo — normal
+  mode prompts, visual mode MOVES the selection
+- `\t` todo domain, **buffer-local to todo.md**: `tt` sort · `ta` archive
+- `\v` vault: mentally reserved, unbound for now (commands exist)
+- `\p` + Cmd/Ctrl+Shift+P: palette (both; usage decides)
+- g layer: `gf` follow · `gh` frontmatter · `gt` todo.md · `gi` inbox
+  (shadows tab-next and insert-at-last-insert — worthless in this app;
+  NVIM_APPNAME keeps code-world natives intact)
+- brackets: `]]`/`[[` headings · `]t`/`[t` tabs (stepping lives here,
+  not on gt)
+- `C-s` show namespace: `C-s C-s` tree · `C-s C-l` links pane ·
+  `C-s C-f` reveal file
+- bare, earned: `<Space>` checkbox cycle; Enter/o/O/Tab/S-Tab list
+  mechanics
+- palette-only until earned: set-blocked, renumber, template apply,
+  page-from-word/selection, vault commands
 
 ## Links + backlinks pane
 
@@ -388,8 +411,8 @@ feature). Nothing else at v1. Every addition needs a named friction.
 4. ~~Todo age display~~ — built 15 Jul, cut hours later: `@due`
    supersedes it (see todo.md section). Undated items may sit.
 5. ~~Auto-commit debounce default~~ — resolved: 15 min (config number).
-6. Keybindings — okf's scheme as defaults; the semantic-keybinding
-   refactor happens at the end, as its own effort.
+6. ~~Keybindings~~ — resolved 15 Jul 2026: the shared grammar's lore
+   vocabulary (see Keybindings section).
 7. ~~Does `:LoreVaultAdd` `git init` a non-repo path?~~ — resolved: yes
    (auto-commit and todo age depend on every vault being a repo).
 8. Picker appearance/theming (snacks highlight groups, layout presets) —
