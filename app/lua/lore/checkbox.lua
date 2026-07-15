@@ -1,15 +1,15 @@
--- Checkbox states. [ ] todo and [x] done are universal GFM; [/] in-progress,
--- [!] blocked, [-] dropped are lore's convention, rendered only here.
--- treesitter can't see the custom states (no node exists for them), so
--- detection is regex and highlighting is matchadd — the sanctioned "regex
--- where treesitter can't" exception.
+-- Checkbox states. [ ] todo and [x] done are universal GFM; [/] in-progress
+-- and [!] blocked are lore's convention, rendered only here. treesitter
+-- can't see the custom states (no node exists for them), so detection is
+-- regex and highlighting is matchadd — the sanctioned "regex where
+-- treesitter can't" exception.
 local M = {}
 
--- Cycle: [ ] -> [/] -> [x] -> [ ]. Blocked/dropped are asserted states, not
--- cycle steps; cycling from them returns to todo.
+-- Cycle: [ ] -> [/] -> [x] -> [ ]. Blocked is an asserted state, not a
+-- cycle step; cycling from it returns to todo.
 local CYCLE = { [" "] = "/", ["/"] = "x" }
 
-local STATES = { [" "] = true, ["/"] = true, ["x"] = true, ["!"] = true, ["-"] = true }
+local STATES = { [" "] = true, ["/"] = true, ["x"] = true, ["!"] = true }
 
 -- "- [x] text" / "  * [/] text" / "3. [ ] text"
 local BOX_PATTERNS = {
@@ -74,7 +74,6 @@ end
 local MATCHES = {
   { "LoreCheckboxInProgress", [=[\v^\s*([-*+]|\d+[.)])\s+\zs\[\/\]]=] },
   { "LoreCheckboxBlocked", [=[\v^\s*([-*+]|\d+[.)])\s+\zs\[!\]]=] },
-  { "LoreCheckboxDropped", [=[\v^\s*([-*+]|\d+[.)])\s+\zs\[-\]]=] },
 }
 
 local function apply_matches()
@@ -90,7 +89,6 @@ end
 function M.setup()
   vim.api.nvim_set_hl(0, "LoreCheckboxInProgress", { link = "DiagnosticInfo", default = true })
   vim.api.nvim_set_hl(0, "LoreCheckboxBlocked", { link = "DiagnosticError", default = true })
-  vim.api.nvim_set_hl(0, "LoreCheckboxDropped", { link = "Comment", default = true })
 
   vim.api.nvim_create_autocmd({ "FileType", "WinEnter" }, {
     group = vim.api.nvim_create_augroup("lore_checkbox", {}),

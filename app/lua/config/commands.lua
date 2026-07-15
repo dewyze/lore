@@ -51,7 +51,7 @@ vim.api.nvim_create_user_command("LoreCheckboxCycle", function()
   checkbox.cycle()
 end, { desc = "Cycle checkbox: [ ] -> [/] -> [x] -> [ ]" })
 
-local CHECKBOX_STATES = { todo = " ", in_progress = "/", done = "x", blocked = "!", dropped = "-" }
+local CHECKBOX_STATES = { todo = " ", in_progress = "/", done = "x", blocked = "!" }
 
 vim.api.nvim_create_user_command("LoreCheckboxSet", function(opts)
   local state = CHECKBOX_STATES[opts.args]

@@ -33,7 +33,7 @@ describe("markdown ftplugin", function()
     local groups = vim.tbl_map(function(match)
       return match.group
     end, vim.fn.getmatches())
-    for _, group in ipairs({ "LoreCheckboxInProgress", "LoreCheckboxBlocked", "LoreCheckboxDropped" }) do
+    for _, group in ipairs({ "LoreCheckboxInProgress", "LoreCheckboxBlocked" }) do
       assert.is_true(vim.tbl_contains(groups, group), group .. " missing")
     end
   end)

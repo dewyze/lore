@@ -13,10 +13,9 @@ end
 
 describe("lore.todo", function()
   describe("sort", function()
-    it("orders by state: [/] [ ] [!] [x], dropped last", function()
+    it("orders by state: [/] [ ] [!] [x]", function()
       buf_with({
         "- [x] shipped",
-        "- [-] abandoned",
         "- [ ] pending",
         "- [!] stuck",
         "- [/] active",
@@ -27,7 +26,6 @@ describe("lore.todo", function()
         "- [ ] pending",
         "- [!] stuck",
         "- [x] shipped",
-        "- [-] abandoned",
       }, lines())
     end)
 

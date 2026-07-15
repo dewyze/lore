@@ -32,10 +32,11 @@ features, mechanics, and what is deliberately NOT being built.
 - **Automation never rewrites what John said.** (Settled 14 Jul 2026,
   replacing a misremembered "nothing acts unasked".) Machines may append,
   manage and augment metadata (frontmatter, tags), and restructure without
-  rewording — todo.md sort reorders whole lines, renumbering rewrites list
-  markers; structure is not speech. Anything beyond that, a human asked
-  for. Automation triggers live at attention boundaries (idle pauses,
-  BufLeave), never mid-typing.
+  rewording — renumbering rewrites list markers; structure is not speech.
+  Anything beyond that, a human asked for. Automation triggers live at
+  attention boundaries (idle pauses, BufLeave), never mid-typing.
+  (todo sort is user-invoked as of 15 Jul, so it no longer needs an
+  automation carve-out at all.)
 
 ## Architecture
 
@@ -113,7 +114,8 @@ vault/
   spaces. Meetings date-prefixed: `2026_07_13_team_sync.md`. Others
   descriptive-stable: `rails_upgrade.md`.
 - Checkbox states: `[ ]` todo, `[x]` done (universal GFM); custom convention
-  rendered only by lore: `[/]` in progress, `[!]` blocked, `[-]` dropped.
+  rendered only by lore: `[/]` in progress, `[!]` blocked. (`[-]` dropped
+  existed briefly; retired 15 Jul 2026 — unneeded.)
 
 ## Creation & templates
 
@@ -232,11 +234,11 @@ admired screenshot). The largest UI piece — watch it hardest.*
 - `conceallevel=2` — stock markdown_inline conceal metadata hides link URLs
   (shows link text; cursor line reveals raw). Free; easy to disable.
 - **Custom states are regex, by design:** tree-sitter-markdown only knows
-  `[ ]`/`[x]`. `[/]`/`[!]`/`[-]` get 3-4 `syntax match` rules in the
-  ftplugin with distinct colors. This is the sanctioned "regex where
-  treesitter can't" exception.
-- Cycle: `[ ]` → `[/]` → `[x]` → `[ ]`. Blocked/dropped are asserted states —
-  explicit set actions, not cycle steps.
+  `[ ]`/`[x]`. `[/]`/`[!]` get regex highlight rules (matchadd) with
+  distinct colors. This is the sanctioned "regex where treesitter can't"
+  exception.
+- Cycle: `[ ]` → `[/]` → `[x]` → `[ ]`. Blocked is an asserted state —
+  explicit set action, not a cycle step.
 - Parent-checkbox auto-update: **cut** (unasked automation + ambiguous
   semantics with custom states).
 - Inline style toggles: **skip** — vim-surround covers it.
@@ -257,10 +259,17 @@ admired screenshot). The largest UI piece — watch it hardest.*
   backlinks pane — todos surface in project context with zero machinery.
 - **Sort by state, subtree-aware** (children travel with parents — treesitter
   `list_item` nodes, not line sorting). Order: `[/]` → `[ ]` → `[!]` → `[x]`
-  sinks.
-- Sort triggers: explicit command + **BufLeave** (never disruptive — the file
-  is tidy on return but never moves under the cursor). Needs a QuitPre
-  companion (BufLeave doesn't fire on all quit paths).
+  sinks. Stable within a state: **hand position is priority** — the top of
+  the `[ ]` block is the pick-up-next queue.
+- Sort triggers: **explicit commands only** (settled 15 Jul 2026; BufLeave
+  auto-sort was built, then cut — sorting-on-my-behalf fights hand
+  ordering). Multiple on-demand sorts are the model: state today; age
+  (blame) and `@due` views later, as commands, never as defaults.
+- **Deadlines** — the one tada field worth keeping: inline `@due(YYYY-MM-DD)`
+  convention (spec pre-approved greppable inline fields). When built: tint
+  at attention boundaries (red past, yellow near), a due-sorted view
+  (rg over the vault, so meeting notes carry deadlines too). Pull only —
+  a deadline that must chase you belongs in Reminders.
 - **Archive:** explicit sweep command moves `[x]` subtrees to `archive.md`,
   stamped with the archive date. Never automatic — items must not vanish
   unwatched.

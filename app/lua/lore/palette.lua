@@ -22,7 +22,6 @@ local COMMANDS = {
   { cmd = "LoreTodoArchive", display = "Todo > Archive Done" },
   { cmd = "LoreCheckboxCycle", display = "Todo > Cycle Checkbox" },
   { cmd = "LoreCheckboxSet blocked", display = "Todo > Set Blocked" },
-  { cmd = "LoreCheckboxSet dropped", display = "Todo > Set Dropped" },
 
   -- Buffer
   { cmd = "LoreTemplate", display = "Buffer > Apply Template" },

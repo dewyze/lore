@@ -26,6 +26,5 @@ describe("lore.palette", function()
       return item.cmd
     end, palette.items())
     assert.is_true(vim.tbl_contains(texts, "LoreCheckboxSet blocked"))
-    assert.is_true(vim.tbl_contains(texts, "LoreCheckboxSet dropped"))
   end)
 end)

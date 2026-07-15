@@ -6,9 +6,9 @@ local vaults = require("lore.vaults")
 
 local M = {}
 
--- Sort order per spec: [/] -> [ ] -> [!] -> [x] sinks. Dropped sinks past
--- done; plain bullets rank with open todos.
-local RANK = { ["/"] = 1, [" "] = 2, ["!"] = 3, ["x"] = 4, ["-"] = 5 }
+-- Sort order per spec: [/] -> [ ] -> [!] -> [x] sinks. Plain bullets rank
+-- with open todos. This table is the config: edit, commit.
+local RANK = { ["/"] = 1, [" "] = 2, ["!"] = 3, ["x"] = 4 }
 local DEFAULT_RANK = RANK[" "]
 
 local list_query = vim.treesitter.query.parse("markdown", "(list) @list")
@@ -155,23 +155,6 @@ function M.archive()
     vim.api.nvim_buf_set_lines(bufnr, item.start_row, item.end_row, false, {})
   end
   vim.notify(("archived %d item(s)"):format(#removals), vim.log.levels.INFO)
-end
-
--- Sort triggers: explicit command plus BufLeave (tidy on return, never
--- moves under the cursor) with a QuitPre companion (BufLeave doesn't fire
--- on all quit paths). Writes only when the sort itself changed the buffer.
-function M.setup()
-  vim.api.nvim_create_autocmd({ "BufLeave", "QuitPre" }, {
-    group = vim.api.nvim_create_augroup("lore_todo", {}),
-    pattern = "*/todo.md",
-    callback = function(event)
-      if M.sort(event.buf) then
-        vim.api.nvim_buf_call(event.buf, function()
-          vim.cmd("silent! update")
-        end)
-      end
-    end,
-  })
 end
 
 return M

@@ -11,7 +11,6 @@ require("config.keymaps")
 
 require("lore.checkbox").setup()
 require("lore.session").setup()
-require("lore.todo").setup()
 require("lore.git").setup()
 require("lore.pane").setup()
 require("lore.completion").setup()
