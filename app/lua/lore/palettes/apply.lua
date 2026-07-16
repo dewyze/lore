@@ -101,6 +101,10 @@ return function(p)
   hl("@string.yaml", { fg = p.fg })
   hl("@punctuation.delimiter.yaml", { fg = p.dim })
 
+  -- snacks picker: Dir links to NonText by default, which we map to the
+  -- selection color — unreadable on the selected row. Give it real ink.
+  hl("SnacksPickerDir", { fg = p.dim })
+
   -- lore's own surfaces
   hl("LoreCheckboxInProgress", { fg = p.prog, bold = true })
   hl("LoreCheckboxBlocked", { fg = p.blocked, bold = true })

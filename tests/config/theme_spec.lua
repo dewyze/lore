@@ -33,6 +33,12 @@ describe("themes", function()
     assert.equals("#333d48", hex(tag.bg))
   end)
 
+  it("picker directory names get real ink, not the selection gray", function()
+    vim.cmd.colorscheme("wisp")
+    local dir = vim.api.nvim_get_hl(0, { name = "SnacksPickerDir" })
+    assert.equals("#969896", hex(dir.fg))
+  end)
+
   it("overdue is a reverse block", function()
     vim.cmd.colorscheme("wisp")
     local over = vim.api.nvim_get_hl(0, { name = "LoreDueOverdue" })
