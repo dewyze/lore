@@ -59,16 +59,25 @@ function M.resolve_target(target, base_dir)
   return path
 end
 
+-- Creation only happens through a real markdown link ("linking births
+-- pages"); the bare <cfile> fallback may open things that exist (pasted
+-- URLs, literal paths) but never creates — K on a prose word is a no-op,
+-- not a junk file. PageFromWord is the deliberate verb for that.
 function M.follow()
-  local target = M.target_at_cursor() or vim.fn.expand("<cfile>")
+  local target = M.target_at_cursor()
+  local from_link = target ~= nil
+  target = target or vim.fn.expand("<cfile>")
   if target == "" then
-    return
+    return vim.notify("no link under cursor", vim.log.levels.INFO)
   end
   if target:match("^%a+://") then
     return vim.ui.open(target)
   end
   local path = M.resolve_target(target, vim.fn.expand("%:p:h"))
   if vim.fn.filereadable(path) == 0 then
+    if not from_link then
+      return vim.notify("no link under cursor", vim.log.levels.INFO)
+    end
     vim.fn.mkdir(vim.fn.fnamemodify(path, ":h"), "p")
     vim.fn.writefile({}, path)
   end
