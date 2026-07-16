@@ -7,8 +7,11 @@
 -- here, stop.
 local backlinks = require("lore.backlinks")
 local links = require("lore.links")
+local pages = require("lore.pages")
 
 local M = {}
+
+local ns = vim.api.nvim_create_namespace("lore_pane")
 
 local FILETYPE = "lore_pane"
 local NAME = "lore://pane"
@@ -93,14 +96,6 @@ local function apply_window_options(win)
   vim.wo[win].cursorline = true
 end
 
-local function vault_relative(path)
-  local vault = require("lore.vaults").active()
-  if vault then
-    return (path:gsub("^" .. vim.pesc(vault.path), ""))
-  end
-  return path
-end
-
 local function render()
   if not (state.win and vim.api.nvim_win_is_valid(state.win)) then
     return
@@ -134,14 +129,24 @@ local function render()
   if #inbound == 0 then
     table.insert(lines, "  (none)")
   end
+  local snippet_starts = {} -- pane lnum -> byte col where the dimmed snippet begins
   for _, ref in ipairs(inbound) do
-    table.insert(lines, ("  %s:%d  %s"):format(vault_relative(ref.file), ref.lnum, ref.text))
+    local title = pages.display_title(ref.file)
+    table.insert(lines, ("  %s  %s"):format(title, ref.text))
     entries[#lines] = { path = ref.file, lnum = ref.lnum }
+    snippet_starts[#lines] = 2 + #title + 2
   end
 
   local buf = ensure_buf()
   vim.bo[buf].modifiable = true
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
+  for lnum, col in pairs(snippet_starts) do
+    vim.api.nvim_buf_set_extmark(buf, ns, lnum - 1, col, {
+      end_col = #lines[lnum],
+      hl_group = "Comment",
+    })
+  end
   vim.bo[buf].modifiable = false
   state.entries = entries
 end

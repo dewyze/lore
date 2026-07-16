@@ -61,6 +61,42 @@ function M.create_in_project(hub_path, title)
   return path
 end
 
+-- Display title for a page: frontmatter title: wins (type: meeting gets
+-- its date appended); otherwise the humanized filename, with a date
+-- prefix flipped into a suffix (2026_07_16_team_sync -> "Team Sync ·
+-- 2026-07-16"). Reads at most the frontmatter block.
+function M.display_title(path)
+  local fm = {}
+  local file = io.open(path, "r")
+  if file then
+    if file:read("*l") == "---" then
+      for _ = 1, 30 do
+        local line = file:read("*l")
+        if not line or line == "---" then
+          break
+        end
+        local k, v = line:match("^(%w+):%s*(.-)%s*$")
+        if k then
+          fm[k] = (v:gsub('^"', ""):gsub('"$', ""))
+        end
+      end
+    end
+    file:close()
+  end
+  if fm.title and fm.title ~= "" then
+    if fm.type == "meeting" and fm.date and fm.date ~= "" then
+      return ("%s · %s"):format(fm.title, fm.date)
+    end
+    return fm.title
+  end
+  local slug = vim.fn.fnamemodify(path, ":t:r")
+  local y, m, d, rest = slug:match("^(%d%d%d%d)[_-](%d%d)[_-](%d%d)[_-](.+)$")
+  if y then
+    return ("%s · %s-%s-%s"):format(M.title(rest), y, m, d)
+  end
+  return M.title(slug)
+end
+
 -- Root-relative link target, the vault's standard link form.
 function M.link_for(path)
   local vault = active_vault()

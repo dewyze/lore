@@ -88,6 +88,37 @@ describe("lore.pages", function()
     end)
   end)
 
+  describe("display_title", function()
+    it("prefers frontmatter title", function()
+      local path = vault_dir .. "/notes/x.md"
+      vim.fn.mkdir(vault_dir .. "/notes", "p")
+      vim.fn.writefile({ "---", "title: The Real Name", "---", "body" }, path)
+      assert.equals("The Real Name", pages.display_title(path))
+    end)
+
+    it("appends the date for meetings", function()
+      local path = vault_dir .. "/meetings/m.md"
+      vim.fn.mkdir(vault_dir .. "/meetings", "p")
+      vim.fn.writefile(
+        { "---", "type: meeting", "title: Auth Design Review", "date: 2026-07-08", "---" },
+        path
+      )
+      assert.equals("Auth Design Review · 2026-07-08", pages.display_title(path))
+    end)
+
+    it("falls back to the humanized filename", function()
+      local path = pages.create("rails upgrade")
+      assert.equals("Rails Upgrade", pages.display_title(path))
+    end)
+
+    it("flips a filename date prefix into a suffix", function()
+      vim.fn.mkdir(vault_dir .. "/meetings", "p")
+      local path = vault_dir .. "/meetings/2026_07_16_team_sync.md"
+      vim.fn.writefile({}, path)
+      assert.equals("Team Sync · 2026-07-16", pages.display_title(path))
+    end)
+  end)
+
   describe("link_for", function()
     it("is root-relative to the vault", function()
       local path = pages.create("Some Page")

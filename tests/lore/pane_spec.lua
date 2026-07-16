@@ -54,14 +54,14 @@ describe("lore.pane", function()
     assert.matches("Links", lines)
     assert.matches("X Project", lines)
     assert.matches("Backlinks", lines)
-    assert.matches("/inbox%.md:1", lines)
+    assert.matches("Inbox", lines)
   end)
 
   it("refreshes when entering another buffer", function()
     pane.toggle()
     vim.cmd.edit(vaults.active().path .. "/projects/x.md")
     local lines = table.concat(pane_lines(), "\n")
-    assert.matches("/todo%.md:1", lines, "backlink from todo.md should appear")
+    assert.matches("Todo", lines, "backlink from todo.md should appear")
   end)
 
   it("opens a backlink at its line in the target window, not the pane", function()
@@ -72,7 +72,7 @@ describe("lore.pane", function()
     -- find the backlink entry line
     local row
     for i, line in ipairs(pane_lines()) do
-      if line:match("/inbox%.md:1") then
+      if line:match("^  Inbox") then
         row = i
       end
     end
