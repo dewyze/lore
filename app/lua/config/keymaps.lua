@@ -49,6 +49,22 @@ end
 vim.keymap.set("n", "]t", "<Cmd>tabnext<CR>", { desc = "next tab" })
 vim.keymap.set("n", "[t", "<Cmd>tabprevious<CR>", { desc = "previous tab" })
 
+-- bare keeps + C layer, parity with the code world (KEYBINDINGS.md)
+vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { silent = true, desc = "move lines down" })
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { silent = true, desc = "move lines up" })
+vim.keymap.set("n", "<CR><CR>", "i<CR><Esc>w", { desc = "split line" })
+vim.keymap.set("n", "<C-w>m", "<C-w>|<C-w>_", { desc = "maximize window" })
+vim.keymap.set("n", "<C-s><C-q>", function()
+  local open = vim.fn.getqflist({ winid = 0 }).winid ~= 0
+  vim.cmd(open and "cclose" or "copen")
+end, { desc = "show: quickfix" })
+vim.keymap.set("n", "<C-s><C-t>", "<Cmd>belowright split | terminal<CR>", { desc = "show: terminal" })
+vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "exit terminal mode" })
+for _, key in ipairs({ "<C-/>", "<C-_>" }) do
+  vim.keymap.set("n", key, "gcc", { remap = true, silent = true, desc = "comment line" })
+  vim.keymap.set("x", key, "gc", { remap = true, silent = true, desc = "comment selection" })
+end
+
 -- palette chords (Cmd+Shift+P is the macOS chord; Ctrl+Shift+P needs a
 -- chord-capable terminal — neovide does both)
 for _, key in ipairs({ "<D-S-p>", "<C-S-p>" }) do
