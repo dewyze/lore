@@ -79,7 +79,12 @@ socket after a crash *hangs*; probe before use); alive → `nvim --server ...
 `--listen`. Config calls `vim.fn.serverstart("/tmp/lore.sock")`. Global
 hotkey (Raycast) → launcher. On open, lore shows the active vault's
 `todo.md`; with an empty registry (true first launch) it shows a message
-directing to `:VaultAdd`. No dashboard in v1 (maybe v2).
+directing to `:VaultAdd`. No dashboard in v1 — but John is leaning toward
+a snacks.dashboard landing (16 Jul, after first real use; deferred, his
+call to reopen). Sketch from that discussion: keys section, due-soon
+(due.collect top 5), todo pulse (counts by state), recent files scoped
+to the vault, vault list with active marker. Open sub-question: dashboard
+replaces the todo.md landing or appears only on demand / empty registry.
 
 ## Vault structure & format
 
