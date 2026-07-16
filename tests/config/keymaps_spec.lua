@@ -2,23 +2,23 @@
 -- config.keymaps, so these are the real global maps).
 describe("keymaps", function()
   local cases = {
-    { "<leader>ff", "LoreFiles" },
-    { "<leader>ss", "LoreGrep" },
-    { "<leader>sw", "LoreGrepWord" },
-    { "<leader>fd", "LoreDue" },
-    { "<leader>nn", "LoreNewPage notes/" },
-    { "<leader>ni", "LoreNewPage ideas/" },
-    { "<leader>nc", "LoreNewPage contacts/" },
-    { "<leader>nm", "LoreNewMeeting" },
-    { "<leader>npp", "LoreNewPage projects/" },
-    { "<leader>npf", "LoreNewProjectFile" },
-    { "<leader>va", "LoreVaultAdd" },
-    { "<leader>cc", "LoreInbox" },
-    { "<leader>ct", "LoreTodoAdd" },
-    { "gt", "LoreOpenTodo" },
-    { "gi", "LoreOpenInbox" },
-    { "<C-S><C-S>", "LoreTree" },
-    { "<C-S><C-L>", "LorePane" },
+    { "<leader>ff", "Files" },
+    { "<leader>ss", "Grep" },
+    { "<leader>sw", "GrepWord" },
+    { "<leader>fd", "Due" },
+    { "<leader>nn", "NewPage notes/" },
+    { "<leader>ni", "NewPage ideas/" },
+    { "<leader>nc", "NewPage contacts/" },
+    { "<leader>nm", "NewMeeting" },
+    { "<leader>npp", "NewPage projects/" },
+    { "<leader>npf", "NewProjectFile" },
+    { "<leader>va", "VaultAdd" },
+    { "<leader>cc", "Inbox" },
+    { "<leader>ct", "TodoAdd" },
+    { "gt", "OpenTodo" },
+    { "gi", "OpenInbox" },
+    { "<C-S><C-S>", "Tree" },
+    { "<C-S><C-L>", "Pane" },
   }
 
   for _, case in ipairs(cases) do
@@ -28,7 +28,7 @@ describe("keymaps", function()
   end
 
   it("captures work from visual mode with a range", function()
-    assert.matches(":LoreInbox", vim.fn.maparg("<leader>cc", "x"), 1, true)
+    assert.matches(":Inbox", vim.fn.maparg("<leader>cc", "x"), 1, true)
   end)
 
   it("tabs step via brackets", function()
@@ -40,8 +40,8 @@ describe("keymaps", function()
     local dir = vim.fn.tempname()
     vim.fn.mkdir(dir, "p")
     vim.cmd.edit(dir .. "/todo.md")
-    assert.matches("LoreTodoSort", vim.fn.maparg("<leader>tt", "n"))
-    assert.matches("LoreTodoArchive", vim.fn.maparg("<leader>ta", "n"))
+    assert.matches("TodoSort", vim.fn.maparg("<leader>tt", "n"))
+    assert.matches("TodoArchive", vim.fn.maparg("<leader>ta", "n"))
     vim.cmd("bwipeout!")
     vim.fn.delete(dir, "rf")
   end)

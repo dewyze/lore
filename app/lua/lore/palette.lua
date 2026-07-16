@@ -5,49 +5,49 @@ local M = {}
 
 local COMMANDS = {
   -- Find / Search
-  { cmd = "LoreFiles", display = "Find > Files" },
-  { cmd = "LoreTags", display = "Find > Tags" },
-  { cmd = "LoreDue", display = "Find > Due" },
-  { cmd = "LoreGrep", display = "Search > Grep" },
-  { cmd = "LoreGrepWord", display = "Search > Word Under Cursor" },
+  { cmd = "Files", display = "Find > Files" },
+  { cmd = "Tags", display = "Find > Tags" },
+  { cmd = "Due", display = "Find > Due" },
+  { cmd = "Grep", display = "Search > Grep" },
+  { cmd = "GrepWord", display = "Search > Word Under Cursor" },
 
   -- New
-  { cmd = "LoreNewPage", display = "New > Note" },
-  { cmd = "LoreNewPage ideas/", display = "New > Idea" },
-  { cmd = "LoreNewPage contacts/", display = "New > Contact" },
-  { cmd = "LoreNewMeeting", display = "New > Meeting" },
-  { cmd = "LoreNewPage projects/", display = "New > Project" },
-  { cmd = "LoreNewProjectFile", display = "New > File Under Project" },
-  { cmd = "LoreNewPagePick", display = "New > Page In Folder…" },
-  { cmd = "LorePageFromSelection", display = "New > Page From Selection" },
-  { cmd = "LorePageFromWord", display = "New > Page From Word" },
+  { cmd = "NewPage", display = "New > Note" },
+  { cmd = "NewPage ideas/", display = "New > Idea" },
+  { cmd = "NewPage contacts/", display = "New > Contact" },
+  { cmd = "NewMeeting", display = "New > Meeting" },
+  { cmd = "NewPage projects/", display = "New > Project" },
+  { cmd = "NewProjectFile", display = "New > File Under Project" },
+  { cmd = "NewPagePick", display = "New > Page In Folder…" },
+  { cmd = "PageFromSelection", display = "New > Page From Selection" },
+  { cmd = "PageFromWord", display = "New > Page From Word" },
 
   -- Go
-  { cmd = "LoreOpenTodo", display = "Go > Todo" },
-  { cmd = "LoreOpenInbox", display = "Go > Inbox" },
+  { cmd = "OpenTodo", display = "Go > Todo" },
+  { cmd = "OpenInbox", display = "Go > Inbox" },
 
   -- Todo
-  { cmd = "LoreTodoSort", display = "Todo > Sort" },
-  { cmd = "LoreTodoArchive", display = "Todo > Archive Done" },
-  { cmd = "LoreCheckboxCycle", display = "Todo > Cycle Checkbox" },
-  { cmd = "LoreCheckboxSet blocked", display = "Todo > Set Blocked" },
+  { cmd = "TodoSort", display = "Todo > Sort" },
+  { cmd = "TodoArchive", display = "Todo > Archive Done" },
+  { cmd = "CheckboxCycle", display = "Todo > Cycle Checkbox" },
+  { cmd = "CheckboxSet blocked", display = "Todo > Set Blocked" },
 
   -- Buffer
-  { cmd = "LoreTemplate", display = "Buffer > Apply Template" },
-  { cmd = "LoreFrontmatter", display = "Buffer > Frontmatter" },
-  { cmd = "LoreRenumber", display = "Buffer > Renumber Lists" },
+  { cmd = "Template", display = "Buffer > Apply Template" },
+  { cmd = "Frontmatter", display = "Buffer > Frontmatter" },
+  { cmd = "Renumber", display = "Buffer > Renumber Lists" },
 
   -- Capture (append + stay)
-  { cmd = "LoreInbox", display = "Capture > Thought (inbox)" },
-  { cmd = "LoreTodoAdd", display = "Capture > Todo" },
+  { cmd = "Inbox", display = "Capture > Thought (inbox)" },
+  { cmd = "TodoAdd", display = "Capture > Todo" },
 
   -- Vault
-  { cmd = "LoreVaultSwitch", display = "Vault > Switch" },
-  { cmd = "LoreVaultList", display = "Vault > List" },
+  { cmd = "VaultSwitch", display = "Vault > Switch" },
+  { cmd = "VaultList", display = "Vault > List" },
 
   -- View
-  { cmd = "LoreTree", display = "View > File Tree" },
-  { cmd = "LorePane", display = "View > Links Pane" },
+  { cmd = "Tree", display = "View > File Tree" },
+  { cmd = "Pane", display = "View > Links Pane" },
 }
 
 local function keymap_for(command)

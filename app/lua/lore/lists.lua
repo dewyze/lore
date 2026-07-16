@@ -104,7 +104,7 @@ local renumber_query = vim.treesitter.query.parse("markdown", "(list) @list")
 -- Renumber every ordered list (nested included — each treesitter list
 -- node is its own sequence), anchored on its first item's number.
 -- Returns whether anything changed. Runs on BufLeave/QuitPre (attention
--- boundaries, like todo sort) + :LoreRenumber. Number tokens are
+-- boundaries, like todo sort) + :Renumber. Number tokens are
 -- structure, not speech — this augments, it never rewords.
 function M.renumber(bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()

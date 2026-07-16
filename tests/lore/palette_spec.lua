@@ -18,13 +18,13 @@ describe("lore.palette", function()
     for _, item in ipairs(palette.items()) do
       by_cmd[item.cmd] = item
     end
-    assert.is_not_nil(by_cmd.LoreFiles.keymap, "LoreFiles should carry its keymap hint")
+    assert.is_not_nil(by_cmd.Files.keymap, "Files should carry its keymap hint")
   end)
 
   it("includes argument-carrying entries for asserted checkbox states", function()
     local texts = vim.tbl_map(function(item)
       return item.cmd
     end, palette.items())
-    assert.is_true(vim.tbl_contains(texts, "LoreCheckboxSet blocked"))
+    assert.is_true(vim.tbl_contains(texts, "CheckboxSet blocked"))
   end)
 end)

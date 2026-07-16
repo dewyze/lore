@@ -64,10 +64,10 @@ settings). Keymap/option *defaults* are app code — the repo is the app, so
 "customizing defaults" means editing the repo and committing.
 
 **Multi-vault:** the vault registry lives in `preferences.json`, managed by
-`:LoreVaultAdd` / `:LoreVaultList` / `:LoreVaultSwitch`. Exactly one **active
+`:VaultAdd` / `:VaultList` / `:VaultSwitch`. Exactly one **active
 vault** at a time — every picker, grep, backlink, and pane is scoped to it,
 never across; cwd follows the active vault. Switching persists; lore reopens
-the last active vault. `:LoreVaultAdd` scaffolds the minimum — `inbox.md`,
+the last active vault. `:VaultAdd` scaffolds the minimum — `inbox.md`,
 `todo.md`, `archive.md` — folders stay born-on-use. No hardcoded paths
 anywhere in app code.
 
@@ -79,7 +79,7 @@ socket after a crash *hangs*; probe before use); alive → `nvim --server ...
 `--listen`. Config calls `vim.fn.serverstart("/tmp/lore.sock")`. Global
 hotkey (Raycast) → launcher. On open, lore shows the active vault's
 `todo.md`; with an empty registry (true first launch) it shows a message
-directing to `:LoreVaultAdd`. No dashboard in v1 (maybe v2).
+directing to `:VaultAdd`. No dashboard in v1 (maybe v2).
 
 ## Vault structure & format
 
@@ -123,7 +123,7 @@ Creation and templating are **orthogonal primitives**:
 
 - **Make a file** — via neo-tree (location = tree position), via
   make-page-from-word/selection or new-page command (location = `notes/`
-  by default; `:LoreNewPage {folder}/ {title}` targets a folder, created
+  by default; `:NewPage {folder}/ {title}` targets a folder, created
   if missing, with keybindings per folder — `\nn`/`\ni`/`\np` style), via
   Raycast meeting script (location = `meetings/`, machine-decided).
 - **Apply a template** — picker over `templates/`, *inserts into the current
@@ -194,14 +194,14 @@ dispatch to user commands, never inline closures.
 - `\s` search: `ss` grep · `sw` word under cursor
 - `\n` new (create + go): `nn` note · `ni` idea · `nc` contact (these
   three from `new_page_bindings` in preferences, managed by
-  `:LoreBindNew`; f/m/p reserved) · `nm` meeting (date-prefixed +
+  `:BindNew`; f/m/p reserved) · `nm` meeting (date-prefixed +
   template) · `nf` folder picker · `npp` project hub · `npf` file under a
   project (links its hub — projects/ is the only folder with subfolders,
   hub page alongside its folder)
 - `\c` capture (append + stay): `cc` thought → inbox · `ct` todo — normal
   mode prompts, visual mode MOVES the selection
 - `\t` todo domain, **buffer-local to todo.md**: `tt` sort · `ta` archive
-- `\v` vault: `va` add (prompts for name + path) — earned first;
+- `\v` vault: `va` add (prompts for path, Tab-completes dirs; name = folder name) — earned first;
   `vv`/`vl` stay command-only until used
 - `\p` + Cmd/Ctrl+Shift+P: palette (both; usage decides)
 - g layer: `gf` follow · `gh` frontmatter · `gt` todo.md · `gi` inbox
@@ -306,7 +306,7 @@ admired screenshot). The largest UI piece — watch it hardest.*
   (machine adds no text). Plain beyond the warn horizon, warm inside it,
   hot inside the urgent horizon, overdue visually distinct. Horizons are
   integers (days) in preferences: `due_warn_days` (7), `due_urgent_days`
-  (2). `:LoreDue` = vault-wide rg view, soonest first — meeting notes and
+  (2). `:Due` = vault-wide rg view, soonest first — meeting notes and
   project pages participate, not just todo.md.
 
 ## Git auto-commit (durability + history)
@@ -320,7 +320,7 @@ admired screenshot). The largest UI piece — watch it hardest.*
   no-op when clean). noautocmd deliberately: autosave is pure persistence,
   no write-hook side effects. Renumbering rides BufLeave/QuitPre instead
   (like todo sort — tidy on return, never moves under the cursor), plus
-  explicit `:LoreRenumber`.
+  explicit `:Renumber`.
 - Commits ride the same pauses, **debounced** (at most once per ~15 min;
   `autocommit_minutes` preference) + `VimLeavePre` force backstop. On-quit
   alone is wrong — lore is a persistent instance, quit is rare.
@@ -404,7 +404,7 @@ feature). Nothing else at v1. Every addition needs a named friction.
 ## Open decisions
 
 1. ~~Vault path(s)~~ — resolved: registry in `preferences.json` via
-   `:LoreVaultAdd`; nothing baked in.
+   `:VaultAdd`; nothing baked in.
 2. ~~Picker~~ — resolved: snacks.picker ("fine for now, we can try it").
 3. ~~Normal-mode indent key~~ — resolved: nothing needed. Insert mode has
    Tab/S-Tab (aliasing vim's native i_CTRL-T/i_CTRL-D); normal mode's
@@ -414,7 +414,7 @@ feature). Nothing else at v1. Every addition needs a named friction.
 5. ~~Auto-commit debounce default~~ — resolved: 15 min (config number).
 6. ~~Keybindings~~ — resolved 15 Jul 2026: the shared grammar's lore
    vocabulary (see Keybindings section).
-7. ~~Does `:LoreVaultAdd` `git init` a non-repo path?~~ — resolved: yes
+7. ~~Does `:VaultAdd` `git init` a non-repo path?~~ — resolved: yes
    (auto-commit and todo age depend on every vault being a repo).
 8. Picker appearance/theming (snacks highlight groups, layout presets) —
    revisit near the end; both snacks and fzf-lua are fully themeable.

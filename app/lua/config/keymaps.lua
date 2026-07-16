@@ -3,35 +3,35 @@
 -- double-letter = default act, find = nameable / search = by content.
 -- Keys dispatch to user commands, never inline closures. This table is
 -- the config: edit, commit. (The \n folder aliases come from
--- preferences instead — :LoreBindNew manages them.)
+-- preferences instead — :BindNew manages them.)
 local preferences = require("lore.preferences")
 
 local M = {}
 
 local KEYMAPS = {
   -- find (nameable)
-  ["<leader>ff"] = "LoreFiles",
-  ["<leader>ft"] = "LoreTags",
-  ["<leader>fd"] = "LoreDue",
+  ["<leader>ff"] = "Files",
+  ["<leader>ft"] = "Tags",
+  ["<leader>fd"] = "Due",
   -- search (by content)
-  ["<leader>ss"] = "LoreGrep",
-  ["<leader>sw"] = "LoreGrepWord",
+  ["<leader>ss"] = "Grep",
+  ["<leader>sw"] = "GrepWord",
   -- new (create + go); folder aliases bound from preferences below
-  ["<leader>nm"] = "LoreNewMeeting",
-  ["<leader>nf"] = "LoreNewPagePick",
-  ["<leader>npp"] = "LoreNewPage projects/",
-  ["<leader>npf"] = "LoreNewProjectFile",
+  ["<leader>nm"] = "NewMeeting",
+  ["<leader>nf"] = "NewPagePick",
+  ["<leader>npp"] = "NewPage projects/",
+  ["<leader>npf"] = "NewProjectFile",
   -- vault (va earned first; vv/vl stay command-only until used)
-  ["<leader>va"] = "LoreVaultAdd",
+  ["<leader>va"] = "VaultAdd",
   -- palette (alias of the chords)
-  ["<leader>p"] = "LorePalette",
+  ["<leader>p"] = "Palette",
   -- go's
-  ["gt"] = "LoreOpenTodo", -- shadows tab-next; ]t/[t cover tabs
-  ["gi"] = "LoreOpenInbox", -- shadows insert-at-last-insert
+  ["gt"] = "OpenTodo", -- shadows tab-next; ]t/[t cover tabs
+  ["gi"] = "OpenInbox", -- shadows insert-at-last-insert
   -- drawers: the C-s show namespace
-  ["<C-s><C-s>"] = "LoreTree",
-  ["<C-s><C-l>"] = "LorePane",
-  ["<C-s><C-f>"] = "LoreTreeReveal",
+  ["<C-s><C-s>"] = "Tree",
+  ["<C-s><C-l>"] = "Pane",
+  ["<C-s><C-f>"] = "TreeReveal",
 }
 
 for key, command in pairs(KEYMAPS) do
@@ -40,7 +40,7 @@ end
 
 -- capture (append + stay): normal prompts, visual MOVES the selection
 -- (":" form so the range reaches the command)
-for key, command in pairs({ ["<leader>cc"] = "LoreInbox", ["<leader>ct"] = "LoreTodoAdd" }) do
+for key, command in pairs({ ["<leader>cc"] = "Inbox", ["<leader>ct"] = "TodoAdd" }) do
   vim.keymap.set("n", key, ("<Cmd>%s<CR>"):format(command), { desc = "lore: " .. command })
   vim.keymap.set("x", key, (":%s<CR>"):format(command), { silent = true, desc = "lore: " .. command })
 end
@@ -52,7 +52,7 @@ vim.keymap.set("n", "[t", "<Cmd>tabprevious<CR>", { desc = "previous tab" })
 -- palette chords (Cmd+Shift+P is the macOS chord; Ctrl+Shift+P needs a
 -- chord-capable terminal — neovide does both)
 for _, key in ipairs({ "<D-S-p>", "<C-S-p>" }) do
-  vim.keymap.set({ "n", "x" }, key, "<Cmd>LorePalette<CR>", { desc = "lore: LorePalette" })
+  vim.keymap.set({ "n", "x" }, key, "<Cmd>Palette<CR>", { desc = "lore: Palette" })
 end
 
 -- \n{letter} folder aliases, from preferences (machine-owned; the
@@ -61,7 +61,7 @@ function M.bind_new(letter, folder)
   vim.keymap.set(
     "n",
     "<leader>n" .. letter,
-    ("<Cmd>LoreNewPage %s/<CR>"):format(folder),
+    ("<Cmd>NewPage %s/<CR>"):format(folder),
     { desc = ("lore: new page in %s/"):format(folder) }
   )
 end
@@ -81,8 +81,8 @@ vim.api.nvim_create_autocmd("BufEnter", {
       return
     end
     vim.b[event.buf].lore_todo_keys = true
-    vim.keymap.set("n", "<leader>tt", "<Cmd>LoreTodoSort<CR>", { buffer = event.buf, desc = "lore: sort todos" })
-    vim.keymap.set("n", "<leader>ta", "<Cmd>LoreTodoArchive<CR>", { buffer = event.buf, desc = "lore: archive done" })
+    vim.keymap.set("n", "<leader>tt", "<Cmd>TodoSort<CR>", { buffer = event.buf, desc = "lore: sort todos" })
+    vim.keymap.set("n", "<leader>ta", "<Cmd>TodoArchive<CR>", { buffer = event.buf, desc = "lore: archive done" })
   end,
 })
 

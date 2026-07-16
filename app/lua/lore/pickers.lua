@@ -10,7 +10,7 @@ local M = {}
 local function active_vault()
   local vault = vaults.active()
   if not vault then
-    vim.notify("no active vault — :LoreVaultAdd {name} {path}", vim.log.levels.WARN)
+    vim.notify("no active vault — :VaultAdd {name} {path}", vim.log.levels.WARN)
   end
   return vault
 end
@@ -89,7 +89,7 @@ function M.new_project_file()
   local pages = require("lore.pages")
   local hubs = vim.fn.glob(vault.path .. "/projects/*.md", true, true)
   if #hubs == 0 then
-    return vim.notify("no projects yet — LoreNewPage projects/ {title}", vim.log.levels.INFO)
+    return vim.notify("no projects yet — NewPage projects/ {title}", vim.log.levels.INFO)
   end
   picker()({
     title = "File under project…",
@@ -176,7 +176,7 @@ function M.vaults()
     table.insert(items, { text = marker .. vault.name .. "  " .. vault.path, name = vault.name })
   end
   if #items == 0 then
-    return vim.notify("no vaults registered — :LoreVaultAdd {name} {path}", vim.log.levels.INFO)
+    return vim.notify("no vaults registered — :VaultAdd {name} {path}", vim.log.levels.INFO)
   end
   picker()({
     title = "Vaults",

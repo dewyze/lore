@@ -20,11 +20,11 @@ vim.opt_local.includeexpr = "v:lua.require'lore.links'.resolve(v:fname)"
 local links = require("lore.links")
 local navigate = require("lore.navigate")
 vim.keymap.set("n", "gf", links.follow, { buffer = true, desc = "follow link (create if missing)" })
-vim.keymap.set("n", "gh", "<Cmd>LoreFrontmatter<CR>", { buffer = true, desc = "frontmatter (and back)" })
+vim.keymap.set("n", "gh", "<Cmd>Frontmatter<CR>", { buffer = true, desc = "frontmatter (and back)" })
 vim.keymap.set({ "n", "x" }, "]]", navigate.next_heading, { buffer = true, desc = "next heading" })
 vim.keymap.set({ "n", "x" }, "[[", navigate.prev_heading, { buffer = true, desc = "previous heading" })
 
-vim.keymap.set("n", "<Space>", "<Cmd>LoreCheckboxCycle<CR>", { buffer = true, desc = "cycle checkbox" })
+vim.keymap.set("n", "<Space>", "<Cmd>CheckboxCycle<CR>", { buffer = true, desc = "cycle checkbox" })
 
 vim.keymap.set("n", "p", function()
   require("lore.urls").paste()

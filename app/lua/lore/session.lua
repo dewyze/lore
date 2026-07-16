@@ -19,7 +19,7 @@ function M.startup()
   else
     -- deferred past the startup redraw, which eats immediate notifies
     vim.defer_fn(function()
-      vim.notify("no vaults registered — :LoreVaultAdd {name} {path} (or \\va)", vim.log.levels.WARN)
+      vim.notify("no vaults registered — :VaultAdd {path} (or \\va)", vim.log.levels.WARN)
     end, 250)
   end
 end
