@@ -17,7 +17,10 @@ function M.startup()
   if vault then
     M.open_vault(vault)
   else
-    vim.notify("no vaults registered — :LoreVaultAdd {name} {path}", vim.log.levels.INFO)
+    -- deferred past the startup redraw, which eats immediate notifies
+    vim.defer_fn(function()
+      vim.notify("no vaults registered — :LoreVaultAdd {name} {path} (or \\va)", vim.log.levels.WARN)
+    end, 250)
   end
 end
 

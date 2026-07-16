@@ -8,19 +8,32 @@ local function notify_error(err)
 end
 
 vim.api.nvim_create_user_command("LoreVaultAdd", function(opts)
+  local function add(name, path)
+    local ok, err = pcall(vaults.add, name, path)
+    if not ok then
+      return notify_error(err)
+    end
+    local active = vaults.active()
+    if active.name == name then
+      session.open_vault(active)
+    end
+  end
   local name, path = unpack(opts.fargs)
-  if not (name and path) then
-    return notify_error("usage: LoreVaultAdd {name} {path}")
+  if name and path then
+    return add(name, path)
   end
-  local ok, err = pcall(vaults.add, name, path)
-  if not ok then
-    return notify_error(err)
-  end
-  local active = vaults.active()
-  if active.name == name then
-    session.open_vault(active)
-  end
-end, { nargs = "+", complete = "dir", desc = "Register a vault (scaffold + git init)" })
+  -- bare (or \va): prompt for both
+  vim.ui.input({ prompt = "vault name" }, function(input_name)
+    if not input_name or input_name == "" then
+      return
+    end
+    vim.ui.input({ prompt = "vault path", completion = "dir" }, function(input_path)
+      if input_path and input_path ~= "" then
+        add(input_name, input_path)
+      end
+    end)
+  end)
+end, { nargs = "*", complete = "dir", desc = "Register a vault (scaffold + git init); prompts when bare" })
 
 vim.api.nvim_create_user_command("LoreRenumber", function()
   require("lore.lists").renumber()

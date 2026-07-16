@@ -21,6 +21,8 @@ local KEYMAPS = {
   ["<leader>nf"] = "LoreNewPagePick",
   ["<leader>npp"] = "LoreNewPage projects/",
   ["<leader>npf"] = "LoreNewProjectFile",
+  -- vault (va earned first; vv/vl stay command-only until used)
+  ["<leader>va"] = "LoreVaultAdd",
   -- palette (alias of the chords)
   ["<leader>p"] = "LorePalette",
   -- go's

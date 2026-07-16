@@ -201,7 +201,8 @@ dispatch to user commands, never inline closures.
 - `\c` capture (append + stay): `cc` thought → inbox · `ct` todo — normal
   mode prompts, visual mode MOVES the selection
 - `\t` todo domain, **buffer-local to todo.md**: `tt` sort · `ta` archive
-- `\v` vault: mentally reserved, unbound for now (commands exist)
+- `\v` vault: `va` add (prompts for name + path) — earned first;
+  `vv`/`vl` stay command-only until used
 - `\p` + Cmd/Ctrl+Shift+P: palette (both; usage decides)
 - g layer: `gf` follow · `gh` frontmatter · `gt` todo.md · `gi` inbox
   (shadows tab-next and insert-at-last-insert — worthless in this app;

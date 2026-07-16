@@ -12,6 +12,7 @@ describe("keymaps", function()
     { "<leader>nm", "LoreNewMeeting" },
     { "<leader>npp", "LoreNewPage projects/" },
     { "<leader>npf", "LoreNewProjectFile" },
+    { "<leader>va", "LoreVaultAdd" },
     { "<leader>cc", "LoreInbox" },
     { "<leader>ct", "LoreTodoAdd" },
     { "gt", "LoreOpenTodo" },
