@@ -25,7 +25,9 @@ function M.startup()
 end
 
 function M.setup()
-  vim.api.nvim_create_autocmd("VimEnter", { once = true, callback = M.startup })
+  -- nested: the :edit inside startup must fire FileType/BufEnter etc.,
+  -- or the landing buffer opens inert (no ftplugin, no highlighting)
+  vim.api.nvim_create_autocmd("VimEnter", { once = true, nested = true, callback = M.startup })
 end
 
 return M

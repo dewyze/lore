@@ -36,5 +36,13 @@ describe("lore.session", function()
     it("does not error with an empty registry", function()
       assert.has_no_error(session.startup)
     end)
+
+    it("opens the landing buffer with autocmds live (the nested trap)", function()
+      vaults.add("personal", vault_dir)
+      session.setup()
+      vim.cmd("doautocmd VimEnter") -- :edit runs inside an autocmd here
+      assert.equals("todo.md", vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":t"))
+      assert.equals("markdown", vim.bo.filetype, "FileType must fire inside the VimEnter edit")
+    end)
   end)
 end)
