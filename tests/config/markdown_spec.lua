@@ -23,7 +23,7 @@ describe("markdown ftplugin", function()
   end)
 
   it("maps the list-continuation keys buffer-locally", function()
-    for _, map in ipairs({ { "<CR>", "i" }, { "o", "n" }, { "O", "n" }, { "<Tab>", "i" }, { "<S-Tab>", "i" } }) do
+    for _, map in ipairs({ { "<CR>", "i" }, { "o", "n" }, { "O", "n" }, { "<Tab>", "i" }, { "<S-Tab>", "i" }, { "K", "n" }, { "gf", "n" } }) do
       local info = vim.fn.maparg(map[1], map[2], false, true)
       assert.equals(1, info.buffer, map[1] .. " not buffer-mapped")
     end
@@ -33,7 +33,7 @@ describe("markdown ftplugin", function()
     local groups = vim.tbl_map(function(match)
       return match.group
     end, vim.fn.getmatches())
-    for _, group in ipairs({ "LoreCheckboxInProgress", "LoreCheckboxBlocked" }) do
+    for _, group in ipairs({ "LoreCheckboxInProgress", "LoreCheckboxBlocked", "LoreTag" }) do
       assert.is_true(vim.tbl_contains(groups, group), group .. " missing")
     end
   end)

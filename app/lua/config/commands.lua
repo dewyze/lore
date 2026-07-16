@@ -236,6 +236,31 @@ vim.api.nvim_create_user_command("Tree", function()
   vim.cmd("Neotree toggle")
 end, { desc = "Toggle the file tree" })
 
+local THEMES = { "wisp", "daybreak", "fathom", "ember" }
+
+vim.api.nvim_create_user_command("Theme", function(opts)
+  local name = opts.args
+  if not vim.tbl_contains(THEMES, name) then
+    return notify_error(("unknown theme %q (%s)"):format(name, table.concat(THEMES, ", ")))
+  end
+  vim.cmd.colorscheme(name)
+  require("lore.preferences").set("colorscheme", name)
+end, {
+  nargs = 1,
+  complete = function()
+    return THEMES
+  end,
+  desc = "Switch theme (persists)",
+})
+
+vim.api.nvim_create_user_command("Font", function(opts)
+  if opts.args == "" then
+    return vim.notify(vim.o.guifont, vim.log.levels.INFO)
+  end
+  vim.o.guifont = opts.args
+  require("lore.preferences").set("font", opts.args)
+end, { nargs = "*", desc = "Set the GUI font, e.g. :Font Iosevka Term Slab:h16 (persists; bare shows current)" })
+
 vim.api.nvim_create_user_command("Frontmatter", function()
   require("lore.navigate").frontmatter_toggle()
 end, { desc = "Jump to frontmatter (and back)" })

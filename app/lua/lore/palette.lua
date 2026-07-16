@@ -48,6 +48,10 @@ local COMMANDS = {
   -- View
   { cmd = "Tree", display = "View > File Tree" },
   { cmd = "Pane", display = "View > Links Pane" },
+  { cmd = "Theme wisp", display = "Theme > Wisp" },
+  { cmd = "Theme daybreak", display = "Theme > Daybreak" },
+  { cmd = "Theme fathom", display = "Theme > Fathom" },
+  { cmd = "Theme ember", display = "Theme > Ember" },
 }
 
 local function keymap_for(command)

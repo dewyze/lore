@@ -8,6 +8,7 @@ require("config.plugins")
 require("config.treesitter")
 require("config.commands")
 require("config.keymaps")
+require("config.neovide")
 
 require("lore.checkbox").setup()
 require("lore.session").setup()
@@ -20,3 +21,5 @@ require("lore.lists").setup()
 -- bin/lore normally passes --listen; this covers direct `NVIM_APPNAME=lore
 -- nvim` launches. Fails harmlessly if the socket is already ours.
 pcall(vim.fn.serverstart, "/tmp/lore.sock")
+
+vim.cmd.colorscheme(require("lore.preferences").get("colorscheme") or "wisp")

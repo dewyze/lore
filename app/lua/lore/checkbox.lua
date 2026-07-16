@@ -74,6 +74,9 @@ end
 local MATCHES = {
   { "LoreCheckboxInProgress", [=[\v^\s*([-*+]|\d+[.)])\s+\zs\[\/\]]=] },
   { "LoreCheckboxBlocked", [=[\v^\s*([-*+]|\d+[.)])\s+\zs\[!\]]=] },
+  -- inline #tag chips ride the same mechanism (headings need a space
+  -- after #, tags forbid one — no collision)
+  { "LoreTag", [=[\v%(^|\s)\zs#[a-zA-Z][a-zA-Z0-9_/-]*]=] },
 }
 
 local function apply_matches()
@@ -89,6 +92,7 @@ end
 function M.setup()
   vim.api.nvim_set_hl(0, "LoreCheckboxInProgress", { link = "DiagnosticInfo", default = true })
   vim.api.nvim_set_hl(0, "LoreCheckboxBlocked", { link = "DiagnosticError", default = true })
+  vim.api.nvim_set_hl(0, "LoreTag", { link = "Special", default = true })
 
   vim.api.nvim_create_autocmd({ "FileType", "WinEnter" }, {
     group = vim.api.nvim_create_augroup("lore_checkbox", {}),
