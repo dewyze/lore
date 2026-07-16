@@ -114,10 +114,15 @@ focuses the window instead of starting another.
 - Neovim 0.12+
 - [ripgrep](https://github.com/BurntSushi/ripgrep) — it *is* the search
 - git
+- A C compiler (Xcode Command Line Tools on macOS) — treesitter parsers
+  compile on first launch
 - [Neovide](https://neovide.dev) (recommended; `LORE_EDITOR=nvim` for terminal)
 - [ical-buddy](https://hasseg.org/icalBuddy/) (optional, for
   meeting-note capture from your calendar)
 - A [Nerd Font](https://www.nerdfonts.com) (for tree icons)
+
+First launch needs the network: plugins clone via `vim.pack` and
+treesitter parsers download and build. After that, everything is local.
 
 ## Philosophy
 
