@@ -28,6 +28,30 @@ describe("lore.navigate", function()
     end)
   end)
 
+  describe("links", function()
+    it("steps between markdown links", function()
+      buf_with({
+        "plain text",
+        "see [alpha](/a.md) then more",
+        "and [beta](/b.md) too",
+      })
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+      navigate.next_link()
+      assert.same({ 2, 4 }, vim.api.nvim_win_get_cursor(0))
+      navigate.next_link()
+      assert.same({ 3, 4 }, vim.api.nvim_win_get_cursor(0))
+      navigate.prev_link()
+      assert.same({ 2, 4 }, vim.api.nvim_win_get_cursor(0))
+    end)
+
+    it("stays put past the last link", function()
+      buf_with({ "[only](/o.md)", "tail" })
+      vim.api.nvim_win_set_cursor(0, { 2, 0 })
+      navigate.next_link()
+      assert.equals(2, row())
+    end)
+  end)
+
   describe("headings", function()
     it("moves to the next and previous heading", function()
       buf_with({ "intro", "# One", "text", "## Two", "text" })

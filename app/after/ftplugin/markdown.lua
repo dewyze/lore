@@ -24,6 +24,8 @@ vim.keymap.set("n", "K", links.follow, { buffer = true, desc = "follow link (ali
 vim.keymap.set("n", "gh", "<Cmd>Frontmatter<CR>", { buffer = true, desc = "frontmatter (and back)" })
 vim.keymap.set({ "n", "x" }, "]]", navigate.next_heading, { buffer = true, desc = "next heading" })
 vim.keymap.set({ "n", "x" }, "[[", navigate.prev_heading, { buffer = true, desc = "previous heading" })
+vim.keymap.set({ "n", "x" }, "]l", navigate.next_link, { buffer = true, desc = "next link" })
+vim.keymap.set({ "n", "x" }, "[l", navigate.prev_link, { buffer = true, desc = "previous link" })
 
 vim.keymap.set("n", "<Space>", "<Cmd>CheckboxCycle<CR>", { buffer = true, desc = "cycle checkbox" })
 

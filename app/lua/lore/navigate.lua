@@ -38,4 +38,14 @@ function M.prev_heading()
   vim.fn.search(HEADING, "bW")
 end
 
+local LINK = [=[\v\[[^\]]*\]\([^)]+\)]=]
+
+function M.next_link()
+  vim.fn.search(LINK, "W")
+end
+
+function M.prev_link()
+  vim.fn.search(LINK, "bW")
+end
+
 return M
