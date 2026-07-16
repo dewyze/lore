@@ -416,8 +416,21 @@ feature). Nothing else at v1. Every addition needs a named friction.
    vocabulary (see Keybindings section).
 7. ~~Does `:VaultAdd` `git init` a non-repo path?~~ — resolved: yes
    (auto-commit and todo age depend on every vault being a repo).
-8. Picker appearance/theming (snacks highlight groups, layout presets) —
-   revisit near the end; both snacks and fzf-lua are fully themeable.
+8. Theming — roster settled 16 Jul 2026, build pending. Port the
+   dotfiles palette engine (`palette/apply.lua` pattern: palette tables +
+   one apply function; colorschemes are one-liners), aimed at lore's
+   surfaces (markdown, LoreDue*/LoreCheckbox*, snacks, neo-tree, pane).
+   Five schemes: **wisp** (default; nightshade + washes behind
+   code/tags/dues), **nightshade**, **daybreak** (light; headings
+   reworked to royal — olive-yellow sank into the cream — plus
+   light-tuned washes), **fathom** (mood, cool deep-sea), **ember**
+   (mood, warm fire). Mood themes keep alarms warm-red — markdown sits
+   between prose and code; urgency must survive the mood. Active scheme
+   persists in preferences. Font: Iosevka Term Slab h16 default,
+   configurable via `font` preference. Also take vimoire's neovide.lua
+   block (padding, linespace, Cmd-key maps) and settle the cursor-trail
+   question. Preview artifact:
+   https://claude.ai/code/artifact/93331870-63d3-4d0a-90fd-02f59d7cd7ac
 9. ~~`wall`-before-commit (autosave)?~~ — resolved: yes; autosave +
    debounced commit both ride idle pauses (see git auto-commit section).
 10. Vault ownership/mixing (personal vs work, cross-vault search) —
