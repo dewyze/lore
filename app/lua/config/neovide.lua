@@ -2,7 +2,7 @@
 -- machine-owned config, :Font manages it.
 local preferences = require("lore.preferences")
 
-local DEFAULT_FONT = "Iosevka Term Slab:h16"
+local DEFAULT_FONT = "Iosevka Term Slab:h18"
 
 vim.o.guifont = preferences.get("font") or DEFAULT_FONT
 vim.o.linespace = 8
