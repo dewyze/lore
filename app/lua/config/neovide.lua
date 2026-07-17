@@ -17,6 +17,7 @@ if vim.g.neovide then
   -- the cursor streaking down to the cmdline on :w read as a progress
   -- bar; keep the in-buffer trail, kill the cmdline leg
   vim.g.neovide_cursor_animate_command_line = false
+  vim.g.neovide_progress_bar_enabled = false
 
   -- Standard macOS keymaps (neovide doesn't provide these)
   vim.keymap.set({ "n", "i" }, "<D-s>", "<Cmd>w<CR>", { desc = "save" })
