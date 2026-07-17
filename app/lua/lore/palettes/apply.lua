@@ -105,6 +105,24 @@ return function(p)
   -- selection color — unreadable on the selected row. Give it real ink.
   hl("SnacksPickerDir", { fg = p.dim })
 
+  -- :terminal ANSI palette. Without these, GUI nvim paints its neon
+  -- built-in defaults (a terminal host would supply its own; neovide
+  -- can't). Brights mirror normals — this is a muted world.
+  local ansi = {
+    [0] = p.mode == "dark" and p.line or p.fg, -- black
+    [1] = p.blocked, -- red
+    [2] = p.str, -- green
+    [3] = p.warn, -- yellow
+    [4] = p.link, -- blue
+    [5] = p.key, -- magenta
+    [6] = p.prog, -- cyan
+    [7] = p.mode == "dark" and p.fg or p.line, -- white
+  }
+  for i = 0, 7 do
+    vim.g["terminal_color_" .. i] = ansi[i]
+    vim.g["terminal_color_" .. (i + 8)] = ansi[i]
+  end
+
   -- lore's own surfaces
   hl("LoreCheckboxInProgress", { fg = p.prog, bold = true })
   hl("LoreCheckboxBlocked", { fg = p.blocked, bold = true })
