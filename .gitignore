@@ -1,0 +1,6 @@
+# Generated app bundles (built from Neovide by bin/build-bundle, not committed)
+*.app
+
+# Editor / tooling
+.claude/
+lazy-lock.json

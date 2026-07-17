@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Build platform/macos/Lore.app by cloning the installed Neovide.app and
+# rebranding it: Lore name/icon/bundle-id, with NVIM_APPNAME baked in via
+# LSEnvironment (no wrapper script), then ad-hoc re-signed.
+#
+# The output is a COPY of a specific Neovide version's bundle — re-run this
+# after every Neovide upgrade to regenerate it.
+set -euo pipefail
+
+ROOT="$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+OUT="$ROOT/platform/macos/Lore.app"
+ICON="$ROOT/assets/lore.icns"
+
+# The Homebrew formula's bin/neovide is a shim that exec's the real bundle at
+# <keg>/Neovide.app/Contents/MacOS/neovide. Resolve the keg from the shim path.
+formula_bin="$(command -v neovide)" || { echo "neovide not on PATH" >&2; exit 1; }
+real_bin="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$formula_bin")"
+keg="$(cd "$(dirname "$real_bin")/.." && pwd)"
+src_app="$keg/Neovide.app"
+[ -d "$src_app" ] || { echo "Neovide.app not found under keg: $src_app" >&2; exit 1; }
+[ -f "$ICON" ] || { echo "icon missing: $ICON" >&2; exit 1; }
+
+echo "cloning $src_app"
+rm -rf "$OUT"
+mkdir -p "$(dirname "$OUT")"
+cp -R "$src_app" "$OUT"
+
+# Swap Neovide's icon for ours.
+rm -f "$OUT/Contents/Resources/Neovide.icns"
+cp "$ICON" "$OUT/Contents/Resources/lore.icns"
+
+# Rebrand Info.plist and bake in NVIM_APPNAME so no launcher script is needed.
+plist="$OUT/Contents/Info.plist"
+pb() { /usr/libexec/PlistBuddy -c "$1" "$plist"; }
+pb "Set :CFBundleName Lore"
+pb "Set :CFBundleDisplayName Lore"
+pb "Set :CFBundleIdentifier dev.lore.app"
+pb "Set :CFBundleIconFile lore"
+pb "Delete :LSEnvironment" 2>/dev/null || true
+pb "Add :LSEnvironment dict"
+pb "Add :LSEnvironment:NVIM_APPNAME string lore"
+# Neovide re-applies its own icon at runtime, overriding CFBundleIconFile, so
+# hand it ours explicitly. NEOVIDE_ICON is the env form of --icon. Absolute
+# path to the bundle's own copy — regenerated here, so it tracks the .app.
+pb "Add :LSEnvironment:NEOVIDE_ICON string $OUT/Contents/Resources/lore.icns"
+
+# Editing the bundle broke Neovide's ad-hoc seal — re-seal ad-hoc.
+codesign --force --deep --sign - "$OUT"
+codesign --verify --deep --strict "$OUT" && echo "signature OK"
+
+# Nudge LaunchServices to pick up the new identity/icon.
+touch "$OUT"
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$OUT"
+
+echo "built $OUT"

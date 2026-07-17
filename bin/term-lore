@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Terminal launcher for Lore: runs the config in the current terminal
+# (e.g. a tmux pane) via terminal Neovim. No socket and no single-instance
+# focus — you get a fresh nvim right here, which is what you want per-pane.
+# For the GUI (Neovide) launch, use bin/lore instead.
+exec env NVIM_APPNAME=lore nvim "$@"
