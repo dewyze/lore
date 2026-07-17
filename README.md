@@ -109,6 +109,18 @@ From then on, every launch drops you in `todo.md` of your active vault.
 The launcher keeps a single instance: if lore is already running, it
 focuses the window instead of starting another.
 
+For a terminal launch instead of the Neovide window — one fresh nvim per
+tmux pane — use `bin/term-lore` (or set `LORE_EDITOR=nvim` on `bin/lore`).
+
+### macOS app
+
+`bin/build-bundle` clones your installed Neovide into
+`platform/macos/Lore.app`, rebranded as Lore — its own name, icon, and Dock
+identity, a real double-click/Spotlight app. It's a copy of a specific
+Neovide version, so re-run it after upgrading Neovide. Lore and vimoire
+apps run side by side without stepping on each other. (Swap the placeholder
+icon by dropping a 1024×1024 `assets/icon.png` and running `bin/build-icon`.)
+
 ## Requirements
 
 - Neovim 0.12+
