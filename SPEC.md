@@ -266,8 +266,9 @@ admired screenshot). The largest UI piece — watch it hardest.*
   `[ ]`/`[x]`. `[/]`/`[!]` get regex highlight rules (matchadd) with
   distinct colors. This is the sanctioned "regex where treesitter can't"
   exception.
-- Cycle: `[ ]` → `[/]` → `[x]` → `[ ]`. Blocked is an asserted state —
-  explicit set action, not a cycle step.
+- Cycle: `[ ]` → `[/]` → `[x]` → `[!]` → `[ ]` (blocked joined the cycle
+  17 Jul 2026, riding last so todo→doing→done stays cheap;
+  `:CheckboxSet blocked` remains for direct assertion).
 - Parent-checkbox auto-update: **cut** (unasked automation + ambiguous
   semantics with custom states).
 - Inline style toggles: **skip** — vim-surround covers it.

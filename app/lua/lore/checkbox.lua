@@ -5,9 +5,9 @@
 -- treesitter can't" exception.
 local M = {}
 
--- Cycle: [ ] -> [/] -> [x] -> [ ]. Blocked is an asserted state, not a
--- cycle step; cycling from it returns to todo.
-local CYCLE = { [" "] = "/", ["/"] = "x" }
+-- Cycle: [ ] -> [/] -> [x] -> [!] -> [ ]. Blocked rides last so the
+-- frequent transitions (todo -> doing -> done) stay cheap.
+local CYCLE = { [" "] = "/", ["/"] = "x", ["x"] = "!" }
 
 local STATES = { [" "] = true, ["/"] = true, ["x"] = true, ["!"] = true }
 
