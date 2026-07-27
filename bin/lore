@@ -16,6 +16,17 @@ esac
 SOCK=/tmp/lore.sock
 EDITOR_BIN="${LORE_EDITOR:-neovide}"
 
+# Self-locate: this file is the source of truth at bin/lore in the checkout
+# (dev mode — raw neovide exec) and a copy shipped by build-bundle at
+# Lore.app/Contents/Resources/lore (app mode — cold-launch the bundle it
+# lives in). Where it wakes up is the mode switch.
+SELF_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
+BUNDLE="${SELF_DIR%/Contents/Resources}"
+case "$BUNDLE" in
+  *.app) [ "$BUNDLE" != "$SELF_DIR" ] || BUNDLE="" ;;
+  *) BUNDLE="" ;;
+esac
+
 probe() {
   [ -S "$SOCK" ] || return 1
   nvim --server "$SOCK" --remote-expr 1 >/dev/null 2>&1 &
@@ -40,7 +51,17 @@ if probe; then
   nvim --server "$SOCK" --remote-send '<Cmd>NeovideFocus<CR>' 2>/dev/null || true
 else
   rm -f "$SOCK"
-  if [ "$(basename "$EDITOR_BIN")" = "neovide" ]; then
+  if [ -n "$BUNDLE" ]; then
+    # App mode: launch through LaunchServices; init.lua serverstarts the
+    # socket, so wait for it before handing over any file args.
+    open -a "$BUNDLE"
+    for _ in $(seq 100); do [ -S "$SOCK" ] && break; sleep 0.1; done
+    [ -S "$SOCK" ] || { echo "lore didn't start" >&2; exit 1; }
+    if [ $# -gt 0 ]; then
+      nvim --server "$SOCK" --remote "$@"
+    fi
+    nvim --server "$SOCK" --remote-send '<Cmd>NeovideFocus<CR>' 2>/dev/null || true
+  elif [ "$(basename "$EDITOR_BIN")" = "neovide" ]; then
     exec env NVIM_APPNAME=lore "$EDITOR_BIN" --fork -- --listen "$SOCK" "$@"
   else
     exec env NVIM_APPNAME=lore "$EDITOR_BIN" --listen "$SOCK" "$@"

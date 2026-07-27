@@ -39,6 +39,11 @@ cp -R "$src_app" "$OUT"
 rm -f "$OUT/Contents/Resources/Neovide.icns"
 cp "$ICON" "$OUT/Contents/Resources/lore.icns"
 
+# Ship the CLI inside the bundle — external callers (Raycast) use this
+# copy instead of reaching into the dev checkout. It self-detects app mode.
+cp "$ROOT/bin/lore" "$OUT/Contents/Resources/lore"
+chmod +x "$OUT/Contents/Resources/lore"
+
 # Rebrand Info.plist and bake in NVIM_APPNAME so no launcher script is needed.
 plist="$OUT/Contents/Info.plist"
 pb() { /usr/libexec/PlistBuddy -c "$1" "$plist"; }
