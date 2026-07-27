@@ -20,6 +20,16 @@ src_app="$keg/Neovide.app"
 [ -d "$src_app" ] || { echo "Neovide.app not found under keg: $src_app" >&2; exit 1; }
 [ -f "$ICON" ] || { echo "icon missing: $ICON" >&2; exit 1; }
 
+CONFIG_LINK="$HOME/.config/lore"
+if [ -L "$CONFIG_LINK" ]; then
+  echo "config symlink already exists: $CONFIG_LINK"
+elif [ -e "$CONFIG_LINK" ]; then
+  echo "warning: $CONFIG_LINK exists but is not a symlink — skipping" >&2
+else
+  ln -s "$ROOT/app" "$CONFIG_LINK"
+  echo "symlinked $ROOT/app -> $CONFIG_LINK"
+fi
+
 echo "cloning $src_app"
 rm -rf "$OUT"
 mkdir -p "$(dirname "$OUT")"
@@ -48,8 +58,27 @@ pb "Add :LSEnvironment:NEOVIDE_ICON string $OUT/Contents/Resources/lore.icns"
 codesign --force --deep --sign - "$OUT"
 codesign --verify --deep --strict "$OUT" && echo "signature OK"
 
-# Nudge LaunchServices to pick up the new identity/icon.
 touch "$OUT"
-/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$OUT"
-
 echo "built $OUT"
+
+# Install a copy into ~/Applications so Raycast/Spotlight/Dock treat Lore as
+# a real app. A copy, not a symlink — Spotlight won't index symlinked
+# bundles. $OUT remains as staging (mirrors vimoire's release layout).
+INSTALL="$HOME/Applications/Lore.app"
+mkdir -p "$HOME/Applications"
+rm -rf "$INSTALL"
+cp -R "$OUT" "$INSTALL"
+
+# NEOVIDE_ICON was baked as an absolute path into staging; point the
+# installed copy at its own icns, then re-seal (the plist edit breaks it).
+/usr/libexec/PlistBuddy -c "Set :LSEnvironment:NEOVIDE_ICON $INSTALL/Contents/Resources/lore.icns" "$INSTALL/Contents/Info.plist"
+codesign --force --deep --sign - "$INSTALL"
+codesign --verify --deep --strict "$INSTALL" && echo "install signature OK"
+
+# Register only the installed identity with LaunchServices, so app search
+# never shows duplicate Lores.
+LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+"$LSREGISTER" -f -u "$OUT" 2>/dev/null || true
+"$LSREGISTER" -f "$INSTALL"
+
+echo "installed $INSTALL"
