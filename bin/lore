@@ -27,6 +27,15 @@ case "$BUNDLE" in
   *) BUNDLE="" ;;
 esac
 
+# Dev mode runs the live working tree via its own config root; the
+# installed app reads the bin/release copy at ~/.config/lore.
+if [ -z "$BUNDLE" ]; then
+  ROOT="$(cd "$SELF_DIR/.." && pwd)"
+  DEV_XDG="${TMPDIR:-/tmp}/lore-dev-xdg"
+  mkdir -p "$DEV_XDG"
+  ln -sfn "$ROOT/app" "$DEV_XDG/lore"
+fi
+
 probe() {
   [ -S "$SOCK" ] || return 1
   nvim --server "$SOCK" --remote-expr 1 >/dev/null 2>&1 &
@@ -62,8 +71,8 @@ else
     fi
     nvim --server "$SOCK" --remote-send '<Cmd>NeovideFocus<CR>' 2>/dev/null || true
   elif [ "$(basename "$EDITOR_BIN")" = "neovide" ]; then
-    exec env NVIM_APPNAME=lore "$EDITOR_BIN" --fork -- --listen "$SOCK" "$@"
+    exec env NVIM_APPNAME=lore XDG_CONFIG_HOME="$DEV_XDG" "$EDITOR_BIN" --fork -- --listen "$SOCK" "$@"
   else
-    exec env NVIM_APPNAME=lore "$EDITOR_BIN" --listen "$SOCK" "$@"
+    exec env NVIM_APPNAME=lore XDG_CONFIG_HOME="$DEV_XDG" "$EDITOR_BIN" --listen "$SOCK" "$@"
   fi
 fi

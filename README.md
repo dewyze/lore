@@ -96,14 +96,12 @@ switches and persists.
 # Clone the repo
 git clone https://github.com/dewyze/lore ~/dev/lore
 
-# Symlink the app directory
-ln -s ~/dev/lore/app ~/.config/lore
-
-# Add bin to your PATH, or symlink the launcher
-ln -s ~/dev/lore/bin/lore /usr/local/bin/lore
+# Release: promote app/ to ~/.config/lore and install ~/Applications/Lore.app
+cd ~/dev/lore && bin/release
 ```
 
-Then run `lore`, and inside: `:VaultAdd ~/path/to/vault` (or `\va`).
+Then launch Lore (Spotlight/Raycast/Dock), and inside: `:VaultAdd
+~/path/to/vault` (or `\va`).
 From then on, every launch drops you in `todo.md` of your active vault.
 
 The launcher keeps a single instance: if lore is already running, it
@@ -112,14 +110,15 @@ focuses the window instead of starting another.
 For a terminal launch instead of the Neovide window — one fresh nvim per
 tmux pane — use `bin/term-lore` (or set `LORE_EDITOR=nvim` on `bin/lore`).
 
-### macOS app
+### Release vs dev
 
-`bin/build-bundle` clones your installed Neovide into
-`platform/macos/Lore.app`, rebranded as Lore — its own name, icon, and Dock
-identity, a real double-click/Spotlight app. It's a copy of a specific
-Neovide version, so re-run it after upgrading Neovide. Lore and vimoire
-apps run side by side without stepping on each other. (Swap the placeholder
-icon by dropping a 1024×1024 `assets/icon.png` and running `bin/build-icon`.)
+`bin/release` is the one verb: it promotes `app/` to `~/.config/lore` and
+rebuilds/installs `~/Applications/Lore.app` — a clone of your installed
+Neovide rebranded as Lore, with the launcher CLI shipped inside at
+`Contents/Resources/lore`. Re-run it after upgrading Neovide. `bin/lore`
+from the checkout is dev mode: the live working tree, its own config root,
+never touching the release. (Swap the placeholder icon by dropping a
+1024×1024 `assets/icon.png` and running `bin/build-icon`.)
 
 ## Requirements
 

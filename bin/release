@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# release: promote app/ to ~/.config/lore and rebuild+install Lore.app.
+# The one verb — after this, the installed app runs this commit.
+# Refuses to run if app/ is dirty or you're not on main.
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+if [[ -n "$(git status --porcelain app/)" ]]; then
+  echo "error: app/ has uncommitted or untracked changes — commit or stash first" >&2
+  exit 1
+fi
+branch="$(git rev-parse --abbrev-ref HEAD)"
+if [[ "$branch" != "main" ]]; then
+  echo "error: not on main (currently on '$branch')" >&2
+  exit 1
+fi
+sha="$(git rev-parse HEAD)"
+
+# --- promote config ---------------------------------------------------
+CONF="$HOME/.config/lore"
+[ -L "$CONF" ] && rm "$CONF" # pre-release-model live symlink
+mkdir -p "$CONF"
+rsync -a --delete app/ "$CONF/"
+echo "$sha" > "$CONF/.release-sha"
+echo "config released $(git rev-parse --short HEAD) -> $CONF"
+
+# --- build + install Lore.app ------------------------------------------
+# Clone the installed Neovide.app and rebrand it: Lore name/icon/bundle-id,
+# NVIM_APPNAME baked in via LSEnvironment, CLI shipped inside, ad-hoc signed.
+ICON="$PWD/assets/lore.icns"
+formula_bin="$(command -v neovide)" || { echo "neovide not on PATH" >&2; exit 1; }
+real_bin="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "$formula_bin")"
+keg="$(cd "$(dirname "$real_bin")/.." && pwd)"
+src_app="$keg/Neovide.app"
+[ -d "$src_app" ] || { echo "Neovide.app not found under keg: $src_app" >&2; exit 1; }
+[ -f "$ICON" ] || { echo "icon missing: $ICON" >&2; exit 1; }
+
+INSTALL="$HOME/Applications/Lore.app"
+TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP"' EXIT
+OUT="$TMP/Lore.app"
+cp -R "$src_app" "$OUT"
+
+rm -f "$OUT/Contents/Resources/Neovide.icns"
+cp "$ICON" "$OUT/Contents/Resources/lore.icns"
+
+# Ship the CLI inside the bundle — external callers (Raycast) use this
+# copy instead of the dev checkout. It self-detects app mode.
+cp bin/lore "$OUT/Contents/Resources/lore"
+chmod +x "$OUT/Contents/Resources/lore"
+
+plist="$OUT/Contents/Info.plist"
+pb() { /usr/libexec/PlistBuddy -c "$1" "$plist"; }
+pb "Set :CFBundleName Lore"
+pb "Set :CFBundleDisplayName Lore"
+pb "Set :CFBundleIdentifier dev.lore.app"
+pb "Set :CFBundleIconFile lore"
+pb "Delete :LSEnvironment" 2>/dev/null || true
+pb "Add :LSEnvironment dict"
+pb "Add :LSEnvironment:NVIM_APPNAME string lore"
+# Neovide re-applies its own icon at runtime, overriding CFBundleIconFile —
+# hand it ours explicitly, at the path the bundle will live at.
+pb "Add :LSEnvironment:NEOVIDE_ICON string $INSTALL/Contents/Resources/lore.icns"
+
+codesign --force --deep --sign - "$OUT"
+
+mkdir -p "$HOME/Applications"
+rm -rf "$INSTALL"
+mv "$OUT" "$INSTALL"
+codesign --verify --deep --strict "$INSTALL" && echo "signature OK"
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$INSTALL"
+
+echo "installed $INSTALL"
