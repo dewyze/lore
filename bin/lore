@@ -6,6 +6,13 @@
 # stock macOS has no timeout(1).
 set -euo pipefail
 
+# GUI callers (Raycast script commands, Finder) run with a bare PATH that
+# lacks homebrew — make neovide/nvim resolve regardless of who launched us.
+case ":$PATH:" in
+  *:/opt/homebrew/bin:*) ;;
+  *) PATH="/opt/homebrew/bin:$PATH" ;;
+esac
+
 SOCK=/tmp/lore.sock
 EDITOR_BIN="${LORE_EDITOR:-neovide}"
 
