@@ -13,6 +13,9 @@ local specs = {
   { src = "https://github.com/nvim-tree/nvim-web-devicons" }, -- neo-tree dependency
   -- replaces the inline-style-toggles feature
   { src = "https://github.com/tpope/vim-surround" },
+  -- rendered headings and tables, already a dotfiles habit. Rendering only:
+  -- list behavior stays lore.lists, checkbox state stays lore.checkbox
+  { src = "https://github.com/MeanderingProgrammer/render-markdown.nvim" },
 }
 
 -- ~/.lore/config.lua exists ONLY for plugin injection (vimoire precedent).

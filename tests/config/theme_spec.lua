@@ -63,6 +63,30 @@ describe("themes", function()
     assert.equals("#eddfc2", hex(vim.api.nvim_get_hl(0, { name = "@markup.raw" }).bg))
   end)
 
+  it("heading bands are blended from the palette, deepest at H1", function()
+    vim.cmd.colorscheme("wisp")
+    -- p.heading (#f0c674) mixed into p.bg (#303030): 0.20 down to 0.04
+    assert.equals("#564e3e", hex(vim.api.nvim_get_hl(0, { name = "RenderMarkdownH1Bg" }).bg))
+    assert.equals("#383633", hex(vim.api.nvim_get_hl(0, { name = "RenderMarkdownH6Bg" }).bg))
+  end)
+
+  it("every theme defines all six bands and a code panel", function()
+    for _, name in ipairs({ "wisp", "daybreak", "fathom", "ember" }) do
+      vim.cmd.colorscheme(name)
+      for level = 1, 6 do
+        local group = "RenderMarkdownH" .. level .. "Bg"
+        assert.is_not_nil(vim.api.nvim_get_hl(0, { name = group }).bg, name .. " missing " .. group)
+      end
+      assert.is_not_nil(vim.api.nvim_get_hl(0, { name = "ColorColumn" }).bg, name .. " missing code panel")
+    end
+  end)
+
+  it("code blocks sit on a palette panel, not stock grey", function()
+    vim.cmd.colorscheme("wisp")
+    -- p.code (#de935f) mixed into p.bg at 0.14
+    assert.equals("#483e37", hex(vim.api.nvim_get_hl(0, { name = "ColorColumn" }).bg))
+  end)
+
   it("every shipped theme loads", function()
     for _, name in ipairs({ "wisp", "daybreak", "fathom", "ember" }) do
       vim.cmd.colorscheme(name)

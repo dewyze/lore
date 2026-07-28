@@ -18,6 +18,22 @@ return function(p)
     vim.api.nvim_set_hl(0, group, spec)
   end
 
+  -- Mix ink into the ground. Derived panels (heading bands, code fences)
+  -- are one alpha each instead of a hand-picked hex per palette, so they
+  -- follow any palette — including light ones, where mixing toward a pale
+  -- ground lightens instead of darkening.
+  local function blend(ink, ground, alpha)
+    local function rgb(hex)
+      return tonumber(hex:sub(2, 3), 16), tonumber(hex:sub(4, 5), 16), tonumber(hex:sub(6, 7), 16)
+    end
+    local ir, ig, ib = rgb(ink)
+    local gr, gg, gb = rgb(ground)
+    local function mix(i, g)
+      return math.floor(i * alpha + g * (1 - alpha) + 0.5)
+    end
+    return ("#%02x%02x%02x"):format(mix(ir, gr), mix(ig, gg), mix(ib, gb))
+  end
+
   -- UI
   hl("Normal", { fg = p.fg, bg = p.bg })
   hl("NormalFloat", { fg = p.fg, bg = p.line })
@@ -50,6 +66,9 @@ return function(p)
   hl("MoreMsg", { fg = p.prog })
   hl("Question", { fg = p.prog })
   hl("Conceal", { fg = p.dim })
+  -- render-markdown draws code fences on ColorColumn; unset it resolves to
+  -- nvim's stock grey, which is wrong on every palette and worse on paper.
+  hl("ColorColumn", { bg = blend(p.code, p.bg, 0.14) })
 
   -- Diagnostics (semantic, sparse use)
   hl("DiagnosticError", { fg = p.blocked })
@@ -95,6 +114,16 @@ return function(p)
   hl("@markup.list.checked", { fg = p.dim })
   hl("@markup.list.unchecked", { fg = p.fg })
   hl("@punctuation.special.markdown", { fg = p.dim })
+  hl("@label", { fg = p.key }) -- fence language tags (render-markdown's CodeInfo)
+
+  -- render-markdown's heading bands. Its own defaults link these to the
+  -- Diff* groups, which this file clears and never defines — every heading
+  -- would land in nvim's stock diff colors. Foregrounds need no mapping:
+  -- RenderMarkdownH1-6 already link to @markup.heading.N.markdown above.
+  local band = { 0.20, 0.16, 0.12, 0.09, 0.06, 0.04 }
+  for level = 1, 6 do
+    hl("RenderMarkdownH" .. level .. "Bg", { bg = blend(p.heading, p.bg, band[level]) })
+  end
 
   -- YAML frontmatter (injected)
   hl("@property.yaml", { fg = p.key })
