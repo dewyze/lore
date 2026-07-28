@@ -2,6 +2,11 @@
 -- completion engine). Typing [[ in a markdown buffer pops vault pages;
 -- accepting rewrites the [[word into a standard [Title](/path.md) link —
 -- the trigger is Obsidian muscle memory, the output stays OKF-standard.
+--
+-- The list is served through 'completefunc' rather than a one-shot
+-- complete() call: nvim re-invokes the function every time the leader
+-- changes, so backspacing a typo re-opens the popup. A complete() list
+-- ends for good the moment the leader matches nothing.
 local pages = require("lore.pages")
 local vaults = require("lore.vaults")
 
@@ -9,13 +14,26 @@ local M = {}
 
 -- byte col of the first "[" while a completion is in flight
 local pending = nil
+-- pages for the completion in flight; one rg per [[, not per keystroke
+local cache = nil
 
 function M.pages()
   local vault = vaults.active()
   if not vault then
     return {}
   end
-  local result = vim.system({ "rg", "--files", "--glob", "*.md" }, { cwd = vault.path }):wait()
+  -- Meetings are held back at the rg level: date-prefixed and unbounded,
+  -- they crowd out the pages worth linking to. Reaching one is a gf or
+  -- picker job, not a mid-sentence one. The leading **/ catches a
+  -- project's own meetings/ as well as the vault-root folder.
+  local result = vim.system({
+    "rg",
+    "--files",
+    "--glob",
+    "*.md",
+    "--glob",
+    "!**/meetings/**",
+  }, { cwd = vault.path }):wait()
   if result.code ~= 0 then
     return {}
   end
@@ -42,25 +60,38 @@ function M.finish(start_col, data)
   vim.api.nvim_win_set_cursor(0, { row, start_col + #link })
 end
 
--- insert-mode [[ handler: insert the brackets, then pop the page list
-function M.trigger()
-  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  vim.api.nvim_buf_set_text(0, row - 1, col, row - 1, col, { "[[" })
-  vim.api.nvim_win_set_cursor(0, { row, col + 2 })
-  local items = M.pages()
-  if #items == 0 then
-    return
+-- 0-based byte col of the "[[" opening an unfinished link before col, or
+-- nil. Link brackets never nest, so the nearest unclosed pair is the one
+-- being typed into.
+function M.link_start(line, col)
+  local open = line:sub(1, col):find("%[%[[^%[%]]*$")
+  return open and open - 1 or nil
+end
+
+-- 'completefunc'. Always answers with the whole page list and lets nvim
+-- filter ('completeopt' carries fuzzy) — that way a leader matching
+-- nothing is one keystroke from matching again.
+function M.completefunc(findstart, _base)
+  if findstart == 1 then
+    local line = vim.api.nvim_get_current_line()
+    local col = vim.api.nvim_win_get_cursor(0)[2]
+    local start_col = M.link_start(line, col)
+    if not start_col then
+      return -3 -- cancel silently, leave completion mode
+    end
+    pending = start_col
+    return start_col + 2 -- the leader begins just past the "[["
   end
-  pending = col
-  vim.fn.complete(col + 3, items) -- 1-based, just past the "[["
+  cache = cache or M.pages()
+  return cache
 end
 
 function M.on_complete_done()
-  if not pending then
+  local start_col = pending
+  pending, cache = nil, nil
+  if not start_col then
     return
   end
-  local start_col = pending
-  pending = nil
   local completed = vim.v.completed_item
   local data = type(completed) == "table"
     and type(completed.user_data) == "table"

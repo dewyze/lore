@@ -22,8 +22,19 @@ describe("markdown ftplugin", function()
     assert.equals(99, vim.wo.foldlevel)
   end)
 
+  -- The [[ popup is only searchable while nvim holds the first match back:
+  -- with insert-on-open, the keystroke after [[ ends completion and the
+  -- wrong page gets linked. Both flags are the feature, not decoration.
+  it("keeps the [[ completion filterable", function()
+    local completeopt = vim.opt_local.completeopt:get()
+    assert.is_true(vim.tbl_contains(completeopt, "fuzzy"), "fuzzy missing")
+    assert.is_true(vim.tbl_contains(completeopt, "noinsert"), "noinsert missing")
+    -- served through completefunc so nvim re-asks as the leader changes
+    assert.equals("v:lua.require'lore.completion'.completefunc", vim.bo.completefunc)
+  end)
+
   it("maps the list-continuation keys buffer-locally", function()
-    for _, map in ipairs({ { "<CR>", "i" }, { "o", "n" }, { "O", "n" }, { "<Tab>", "i" }, { "<S-Tab>", "i" }, { "K", "n" }, { "gf", "n" } }) do
+    for _, map in ipairs({ { "<CR>", "i" }, { "o", "n" }, { "O", "n" }, { "<Tab>", "i" }, { "<S-Tab>", "i" }, { "K", "n" }, { "gf", "n" }, { "[[", "i" } }) do
       local info = vim.fn.maparg(map[1], map[2], false, true)
       assert.equals(1, info.buffer, map[1] .. " not buffer-mapped")
     end

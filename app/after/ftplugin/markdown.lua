@@ -6,8 +6,11 @@ vim.bo.softtabstop = 2
 -- stock markdown_inline conceal hides link URLs; cursor line reveals raw
 vim.opt_local.conceallevel = 2
 
--- fuzzy-filter the [[ page completion (native ins-completion)
-vim.opt_local.completeopt:append("fuzzy")
+-- fuzzy-filter the [[ page completion (native ins-completion). noinsert is
+-- load-bearing: without it nvim commits the first match the moment the pum
+-- opens, so the next keystroke ends completion and CompleteDone links the
+-- wrong page. Held back, the match stays highlighted and typing narrows it.
+vim.opt_local.completeopt:append({ "fuzzy", "noinsert" })
 
 vim.opt_local.foldmethod = "expr"
 vim.opt_local.foldexpr = "v:lua.vim.treesitter.foldexpr()"
@@ -33,9 +36,10 @@ vim.keymap.set("n", "p", function()
   require("lore.urls").paste()
 end, { buffer = true, desc = "paste (urls become titled links)" })
 
-vim.keymap.set("i", "[[", function()
-  require("lore.completion").trigger()
-end, { buffer = true, desc = "complete a page link" })
+-- [[ types itself, then hands off to the page completefunc. completefunc,
+-- not omnifunc: omnifunc is the filetype/LSP slot and would get stomped.
+vim.bo.completefunc = "v:lua.require'lore.completion'.completefunc"
+vim.keymap.set("i", "[[", "[[<C-x><C-u>", { buffer = true, desc = "complete a page link" })
 
 local lists = require("lore.lists")
 vim.keymap.set("i", "<CR>", lists.press_enter, { buffer = true, desc = "continue list item" })
