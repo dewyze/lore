@@ -1,6 +1,10 @@
 # Generated app bundles (built from Neovide by bin/build-bundle, not committed)
 *.app
 
-# Editor / tooling
-.claude/
+# Editor / tooling. Skills are versioned with the app they encode; the rest
+# of .claude/ is machine-local. Listed as .claude/* rather than .claude/
+# because git never descends into an excluded directory, so a negation
+# inside one has no effect.
+.claude/*
+!.claude/skills/
 lazy-lock.json
