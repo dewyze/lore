@@ -159,6 +159,51 @@ When a series has enough instances to be worth navigating and no hub exists,
 raise it in Step 6 as a proposal — creating the hub is a structural change,
 so it is John's to make.
 
+### Resolving attendee addresses
+
+`attendees:` is a mix: display names for people whose calendar entry carries
+one, bare addresses for everyone else. Contact pages hold the mapping, so
+resolution is a lookup, never a guess.
+
+**Build the map from the vault, fresh each run.** No index, nothing cached:
+
+```bash
+rg -l '^type: Person' -g '*.md' "$VAULT"
+```
+
+Read each page and collect every address it claims — `resource: mailto:…`
+(written by `ContactFromSelection`) and any `emails:` list a hand-authored
+page carries. The name to substitute is that page's display name: frontmatter
+`title:` if present, else its first `# ` heading, else the humanized filename
+— the same precedence as `pages.display_title`.
+
+**Then substitute, under four rules:**
+
+- **Only inside `attendees:`.** An address in prose is content; leave it.
+  This is the one place the pass replaces rather than appends, and it is
+  legitimate only because attendees are machine-filled metadata
+  (`SPEC.md:116`) — not an exception to "never reword prose", outside its
+  scope entirely.
+- **A plain name, never a link.** `SPEC.md:116` is explicit. Do not helpfully
+  turn `Dana Bell` into `[Dana Bell](/contacts/dana_bell.md)`.
+- **No match, no change.** An unresolved address stays exactly as written.
+  It is a visible marker that a contact is worth making, and inventing
+  "Dana B" from `dana.b@` is precisely the ontology-inventing that rule 2
+  forbids.
+- **Preserve the shape.** The capture script writes a quoted block sequence
+  (`  - "Dana Bell"`). Keep the indentation and the quotes.
+
+Unresolved addresses go in the Step 6 report so John can promote the ones
+worth having with `\nc` in visual mode. This lists every address still
+sitting in an attendees block — anchored to the block-sequence shape, so an
+address in prose is not caught — and the unresolved set is what remains after
+subtracting the map. An address can look unresolved here and still match a
+contact through its `emails:` list, so subtract before reporting:
+
+```bash
+rg -n '^\s+- "[^"]*@[^"]*"' -g '*.md' "$VAULT"
+```
+
 ## Step 4 — Links
 
 Backlinks are live ripgrep over explicit links (`README.md` Links), so an
@@ -229,6 +274,8 @@ Report, don't act. Cover John's item 4 and anything else load-bearing:
   is invisible to backlinks and pickers (`pages.lua:52-59`).
 - A recurring `meeting:` series with several instances and no hub to hang
   them on.
+- Attendee addresses that resolved to no contact page, grouped by address and
+  counted across notes — the frequent ones are the contacts worth making.
 - Tag vocabulary drift: near-duplicates that should collapse.
 - Notes that look misfiled.
 - Conformance gaps you chose not to fix, and why.
