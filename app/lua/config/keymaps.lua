@@ -40,6 +40,17 @@ end
 
 -- capture (append + stay): normal prompts, visual MOVES the selection
 -- (":" form so the range reaches the command)
+-- \nc is "new contact" in both modes: normal prompts for a name, visual
+-- promotes a selected address and resolves it in place. bind_new binds normal
+-- only, so the halves coexist. (The letter is hardcoded here while the normal
+-- half comes from preferences — they drift if :BindNew moves contacts.)
+vim.keymap.set(
+  "x",
+  "<leader>nc",
+  ":ContactFromSelection<CR>",
+  { silent = true, desc = "lore: ContactFromSelection" }
+)
+
 for key, command in pairs({ ["<leader>cc"] = "Inbox", ["<leader>ct"] = "TodoAdd" }) do
   vim.keymap.set("n", key, ("<Cmd>%s<CR>"):format(command), { desc = "lore: " .. command })
   vim.keymap.set("x", key, (":%s<CR>"):format(command), { silent = true, desc = "lore: " .. command })

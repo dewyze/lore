@@ -21,6 +21,7 @@ local COMMANDS = {
   { cmd = "NewPagePick", display = "New > Page In Folder…" },
   { cmd = "PageFromSelection", display = "New > Page From Selection" },
   { cmd = "PageFromWord", display = "New > Page From Word" },
+  { cmd = "ContactFromSelection", display = "New > Contact From Selected Email" },
 
   -- Go
   { cmd = "OpenTodo", display = "Go > Todo" },

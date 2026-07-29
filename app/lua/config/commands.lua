@@ -147,6 +147,10 @@ vim.api.nvim_create_user_command("PageFromSelection", function()
   require("lore.pages").from_selection()
 end, { range = true, desc = "Create a page from the selection, replace it with a link" })
 
+vim.api.nvim_create_user_command("ContactFromSelection", function()
+  require("lore.pages").contact_from_selection()
+end, { range = true, desc = "Promote a selected email into a contact, replace it with the name" })
+
 vim.api.nvim_create_user_command("NewMeeting", function(opts)
   local function create(title)
     local ok, result = pcall(require("lore.pages").create, title, "meetings", { date_prefix = true })

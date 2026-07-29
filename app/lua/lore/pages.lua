@@ -152,4 +152,63 @@ function M.from_selection()
   vim.api.nvim_buf_set_text(0, row - 1, start_col - 1, row - 1, end_col, { link })
 end
 
+-- An address and nothing else: the selection must be the bare address, so
+-- vi" inside a quoted attendee entry is the motion. Strict beats forgiving
+-- here — a silently mis-parsed selection would name a page after punctuation.
+-- The domain has to end in letters, which is what rejects a trailing quote
+-- or comma dragged in by a sloppy selection.
+local EMAIL = "^[%w._%%+%-]+@[%w.%-]+%.%a%a+$"
+
+-- contacts/<name>.md, seeded with OKF person frontmatter the first time.
+-- Returns the path and whether it seeded. An existing page is never
+-- rewritten: a second address for the same person is reported, not merged.
+function M.create_contact(name, email)
+  local path = M.create(name, "contacts")
+  if #vim.fn.readfile(path) > 0 then
+    return path, false
+  end
+  vim.fn.writefile({
+    "---",
+    "type: Person",
+    ("resource: mailto:%s"):format(email),
+    "---",
+    "",
+    ("# %s"):format(name),
+    "",
+  }, path)
+  return path, true
+end
+
+-- Promote a selected address into a contact page and resolve it to the name
+-- in place. The name is prompted, never derived — "Dana Bell" out of
+-- "dana.b@" is a guess, and one keystroke of typing beats a wrong page
+-- title. What replaces the address is a plain name, NOT a link: attendees
+-- are names by spec, and the address now lives on the contact page.
+function M.contact_from_selection()
+  local start_pos = vim.fn.getpos("'<")
+  local end_pos = vim.fn.getpos("'>")
+  if start_pos[2] ~= end_pos[2] then
+    return vim.notify("contact-from-selection works on a single line", vim.log.levels.WARN)
+  end
+  local row, start_col, end_col = start_pos[2], start_pos[3], end_pos[3]
+  local line = vim.api.nvim_buf_get_lines(0, row - 1, row, false)[1]
+  end_col = math.min(end_col, #line)
+  local email = line:sub(start_col, end_col)
+  if not email:match(EMAIL) then
+    return vim.notify("select an email address", vim.log.levels.WARN)
+  end
+  vim.ui.input({ prompt = ("name for %s: "):format(email) }, function(name)
+    if not name or vim.trim(name) == "" then
+      return
+    end
+    name = vim.trim(name)
+    local path, seeded = M.create_contact(name, email)
+    vim.api.nvim_buf_set_text(0, row - 1, start_col - 1, row - 1, end_col, { name })
+    vim.notify(
+      ("%s %s"):format(seeded and "created" or "already had", M.link_for(path)),
+      vim.log.levels.INFO
+    )
+  end)
+end
+
 return M

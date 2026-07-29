@@ -152,4 +152,86 @@ describe("lore.pages", function()
       assert.equals(1, vim.fn.filereadable(vault_dir .. "/notes/rails_upgrade.md"))
     end)
   end)
+
+  describe("create_contact", function()
+    it("seeds a person page with the address as its resource", function()
+      local path, seeded = pages.create_contact("Dana Bell", "dana.b@example.com")
+      -- not compared to vault_dir directly: macOS resolves /var to /private/var
+      assert.matches("/contacts/dana_bell%.md$", path)
+      assert.is_true(seeded)
+      assert.same({
+        "---",
+        "type: Person",
+        "resource: mailto:dana.b@example.com",
+        "---",
+        "",
+        "# Dana Bell",
+        "",
+      }, vim.fn.readfile(path))
+    end)
+
+    it("never rewrites a page that already has content", function()
+      local path = pages.create("Dana Bell", "contacts")
+      vim.fn.writefile({ "---", "type: Person", "---", "", "hand-written notes" }, path)
+      local _, seeded = pages.create_contact("Dana Bell", "second@example.com")
+      assert.is_false(seeded, "an existing contact must not be clobbered")
+      assert.equals("hand-written notes", vim.fn.readfile(path)[5])
+    end)
+  end)
+
+  describe("contact_from_selection", function()
+    -- vim.ui.input and vim.notify are stubbed because they *are* the human —
+    -- the same boundary as stdin and stdout, not lore standing in for itself.
+    -- Capturing notify also keeps a passing run silent.
+    local function with_input(answer, fn)
+      local original_input, original_notify = vim.ui.input, vim.notify
+      local notified = {}
+      vim.ui.input = function(_, on_confirm)
+        on_confirm(answer)
+      end
+      vim.notify = function(msg)
+        table.insert(notified, msg)
+      end
+      local ok, err = pcall(fn)
+      vim.ui.input, vim.notify = original_input, original_notify
+      assert(ok, err)
+      return notified
+    end
+
+    local function select_email(line, first, last)
+      vim.cmd.enew()
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, { line })
+      vim.fn.setpos("'<", { 0, 1, first, 0 })
+      vim.fn.setpos("'>", { 0, 1, last, 0 })
+    end
+
+    it("substitutes the prompted name and leaves the quoting alone", function()
+      -- the shape the raycast script writes; cols 6-23 are inside the quotes
+      select_email('  - "dana.b@example.com"', 6, 23)
+      with_input("Dana Bell", pages.contact_from_selection)
+      assert.equals('  - "Dana Bell"', vim.api.nvim_get_current_line())
+      assert.equals(1, vim.fn.filereadable(vault_dir .. "/contacts/dana_bell.md"))
+    end)
+
+    it("substitutes a plain name, never a link (attendees are not links)", function()
+      select_email("ray@example.com", 1, 15)
+      with_input("Ray Ortiz", pages.contact_from_selection)
+      assert.equals("Ray Ortiz", vim.api.nvim_get_current_line())
+    end)
+
+    it("refuses a selection that is not an address", function()
+      select_email("just some prose here", 1, 9)
+      local notified = with_input("Nope", pages.contact_from_selection)
+      assert.equals("just some prose here", vim.api.nvim_get_current_line())
+      assert.equals(0, vim.fn.isdirectory(vault_dir .. "/contacts"))
+      assert.same({ "select an email address" }, notified)
+    end)
+
+    it("abandons an empty or cancelled name", function()
+      select_email("kai@example.com", 1, 15)
+      with_input(nil, pages.contact_from_selection)
+      assert.equals("kai@example.com", vim.api.nvim_get_current_line())
+      assert.equals(0, vim.fn.isdirectory(vault_dir .. "/contacts"))
+    end)
+  end)
 end)

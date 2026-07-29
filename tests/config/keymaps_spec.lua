@@ -31,6 +31,13 @@ describe("keymaps", function()
     assert.matches(":Inbox", vim.fn.maparg("<leader>cc", "x"), 1, true)
   end)
 
+  -- \nc is "new contact" in both modes; the visual half seeds it from a
+  -- selected address. bind_new only touches normal mode, so nothing shadows.
+  it("contact-from-selection rides the visual half of \\nc", function()
+    assert.matches(":ContactFromSelection", vim.fn.maparg("<leader>nc", "x"), 1, true)
+    assert.matches("NewPage contacts/", vim.fn.maparg("<leader>nc", "n"), 1, true)
+  end)
+
   it("tabs step via brackets", function()
     assert.matches("tabnext", vim.fn.maparg("]t", "n"))
   end)
